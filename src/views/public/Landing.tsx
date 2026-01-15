@@ -1,45 +1,49 @@
 /**
  * Vista Landing Page
  *
- * @description Página de inicio pública
- * TODO: Implementar diseño completo con hero section
- * TODO: Agregar secciones de características
- * TODO: Agregar call-to-action
+ * @description Página de inicio pública con diseño completo
  */
 
-import { Link } from 'react-router-dom';
-import { ROUTES } from '@/constants/app.constants';
+import {
+  LandingNavbar,
+  LandingHero,
+  LandingCompanies,
+  LandingFeatures,
+  LandingComparison,
+  LandingCTA,
+  LandingFooter,
+} from '@/components/landing';
 
 export const Landing = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Genera y firma contratos legales válidos en minutos
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Sin abogado, sin riesgo. La plataforma que necesitas para gestionar tus contratos de forma rápida y segura.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to={ROUTES.REGISTER}
-              className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-            >
-              Empezar gratis
-            </Link>
-            <Link
-              to={ROUTES.LOGIN}
-              className="px-8 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
-            >
-              Iniciar sesión
-            </Link>
-          </div>
-        </div>
+    <div className="bg-slate-50 text-slate-900 dark:bg-slate-950 min-h-screen font-sans selection:bg-indigo-500 selection:text-white overflow-x-hidden dark:text-slate-100 relative isolate">
+      {/* Animated Background Blobs */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        <div className="w-96 h-96 bg-blue-500/10 rounded-full dark:bg-blue-900/20 absolute top-0 left-1/4 blur-3xl mix-blend-multiply dark:mix-blend-normal animate-blob" />
+        <div className="w-96 h-96 bg-indigo-500/10 rounded-full dark:bg-indigo-900/20 absolute top-0 right-1/4 blur-3xl mix-blend-multiply dark:mix-blend-normal animate-blob animation-delay-2000" />
+        <div className="w-96 h-96 bg-emerald-500/10 rounded-full dark:bg-emerald-900/20 absolute -bottom-32 left-1/3 blur-3xl mix-blend-multiply dark:mix-blend-normal animate-blob animation-delay-4000" />
       </div>
 
-      {/* TODO: Agregar secciones de características, testimonios, etc. */}
+      {/* Navigation */}
+      <LandingNavbar />
+
+      {/* Hero Section */}
+      <LandingHero />
+
+      {/* Companies Section */}
+      <LandingCompanies />
+
+      {/* Features Section */}
+      <LandingFeatures />
+
+      {/* Comparison Section */}
+      <LandingComparison />
+
+      {/* CTA Section */}
+      <LandingCTA />
+
+      {/* Footer */}
+      <LandingFooter />
     </div>
   );
 };

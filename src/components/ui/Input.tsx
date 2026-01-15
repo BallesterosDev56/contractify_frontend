@@ -7,7 +7,8 @@
  * TODO: Implementar iconos
  */
 
-import type { FC, InputHTMLAttributes, forwardRef } from 'react';
+import type { InputHTMLAttributes } from 'react';
+import { forwardRef } from 'react';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
