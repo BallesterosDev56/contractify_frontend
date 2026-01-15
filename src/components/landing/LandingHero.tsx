@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/constants/app.constants';
-import { CheckCircle2, ArrowRight, ShieldCheck, PenTool } from 'lucide-react'; // Asegúrate de tener lucide-react o usa iconos similares
+import { CheckCircle2, ArrowRight, PenTool } from 'lucide-react'; // Asegúrate de tener lucide-react o usa iconos similares
 
 export const LandingHero = () => {
   const [isSigned, setIsSigned] = useState(false);

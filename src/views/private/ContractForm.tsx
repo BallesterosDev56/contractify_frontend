@@ -13,7 +13,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useGetContractTypeSchema } from '@/hooks/api/useGetContractTypeSchema';
 import { useCreateContract } from '@/hooks/api/useCreateContract';
-import { useAutoSave } from '@/hooks/utils/useAutoSave';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -23,7 +22,7 @@ import { ROUTES } from '@/constants/app.constants';
 export const ContractForm = () => {
   const { type } = useParams<{ type: string }>();
   const navigate = useNavigate();
-  const { schema, isLoading: schemaLoading } = useGetContractTypeSchema(type || null);
+  const { isLoading: schemaLoading } = useGetContractTypeSchema(type || null);
   const { createContract, isLoading: isCreating } = useCreateContract();
 
   // TODO: Generar schema de Zod dinámicamente basado en el schema del tipo
@@ -35,12 +34,10 @@ export const ContractForm = () => {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
   } = useForm({
     resolver: zodResolver(formSchema),
   });
 
-  const formData = watch();
 
   // TODO: Implementar auto-guardado
   // useAutoSave(() => {
@@ -71,7 +68,7 @@ export const ContractForm = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card title="Información del contrato">
           {/* TODO: Renderizar campos dinámicamente basado en schema */}
-          <Input label="Título" {...register('title')} error={errors.title?.message} />
+           <Input label="Título" {...register('title')} error={errors.title?.message as string} />
         </Card>
 
         <div className="flex justify-end space-x-4">

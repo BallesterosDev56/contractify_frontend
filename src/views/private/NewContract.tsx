@@ -31,14 +31,16 @@ export const NewContract = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {contractTypes.map((type) => (
-          <Card
+          <div
             key={type.id}
             className="cursor-pointer hover:shadow-lg transition-shadow"
             onClick={() => handleSelectType(type.id)}
           >
-            <h3 className="text-lg font-semibold">{type.name}</h3>
-            <p className="text-sm text-gray-600 mt-2">{type.description}</p>
-          </Card>
+            <Card>
+              <h3 className="text-lg font-semibold">{type.name}</h3>
+              <p className="text-sm text-gray-600 mt-2">{type.description}</p>
+            </Card>
+          </div>
         ))}
       </div>
     </div>

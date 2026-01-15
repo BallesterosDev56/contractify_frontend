@@ -37,7 +37,7 @@ export const formatContractDate = (dateString: string): string => {
  * Valida si un contrato puede ser firmado
  * TODO: Implementar validaciones de negocio
  */
-export const canSignContract = (contract: Contract, userId: string): boolean => {
+export const canSignContract = (_contract: Contract, _userId: string): boolean => {
   // TODO: Verificar si el usuario es parte del contrato
   // TODO: Verificar si ya firmó
   // TODO: Verificar orden de firmas si aplica

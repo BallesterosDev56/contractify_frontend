@@ -27,7 +27,7 @@ import type {
  * TODO: Implementar ordenamiento
  */
 export const getContractsService = (filters?: ContractFilters): Promise<Contract[]> => {
-  return apiGet<Contract[]>(API_ENDPOINTS.CONTRACTS.LIST, filters);
+  return apiGet<Contract[]>(API_ENDPOINTS.CONTRACTS.LIST, filters as Record<string, unknown>);
 };
 
 /**

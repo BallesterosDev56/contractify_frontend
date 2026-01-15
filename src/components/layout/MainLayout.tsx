@@ -7,7 +7,8 @@
  * TODO: Implementar breadcrumbs
  */
 
-import type { FC, ReactNode, useState } from 'react';
+import type { FC, ReactNode } from 'react';
+import { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/utils/useAuth';
 import { ROUTES } from '@/constants/app.constants';

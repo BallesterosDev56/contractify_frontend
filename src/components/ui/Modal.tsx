@@ -7,7 +7,8 @@
  * TODO: Implementar focus trap
  */
 
-import type { FC, ReactNode, useEffect } from 'react';
+import type { FC, ReactNode } from 'react';
+import { useEffect } from 'react';
 
 export interface ModalProps {
   isOpen: boolean;

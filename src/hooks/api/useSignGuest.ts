@@ -12,7 +12,8 @@
 
 import { useState } from 'react';
 import { signGuestService, validateTokenService } from '@/services/signature.service';
-import type { SignGuestRequest, SignGuestResponse, ValidateTokenRequest, ValidateTokenResponse } from '@/types';
+import type { SignGuestRequest, SignGuestResponse, ValidateTokenResponse } from '@/types';
+//import { validateTokenService } from '@/services/signature.service';
 
 export const useSignGuest = () => {
   const [isSigning, setIsSigning] = useState(false);

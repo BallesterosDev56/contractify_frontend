@@ -5,7 +5,7 @@
  * Siguiendo el patrón de React Router v6 con array de configuración
  */
 
-import { lazy } from 'react';
+//import { lazy } from 'react';
 import { ProtectRoute } from '@/components/ProtectRoute';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ROUTES } from '@/constants/app.constants';

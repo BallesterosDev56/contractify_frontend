@@ -7,7 +7,7 @@
  * TODO: Implementar modal de firma
  */
 
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useState } from 'react';
 import { useGetContract } from '@/hooks/api/useGetContract';
 import { useGenerateContract } from '@/hooks/api/useGenerateContract';
@@ -15,13 +15,11 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { Modal } from '@/components/ui/Modal';
-import { ROUTES } from '@/constants/app.constants';
 
 export const ContractPreview = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
   const { contract, isLoading } = useGetContract(id || null);
-  const { generateContract, isGenerating } = useGenerateContract();
+  const { isGenerating } = useGenerateContract();
   const [showSignModal, setShowSignModal] = useState(false);
 
   const handleRegenerate = async () => {

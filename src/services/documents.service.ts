@@ -12,7 +12,6 @@ import { API_ENDPOINTS } from '@/constants/api.constants';
 import type {
   GeneratePDFRequest,
   GeneratePDFResponse,
-  DownloadRequest,
   BulkDownloadRequest,
   BulkDownloadResponse,
 } from '@/types';

@@ -46,7 +46,7 @@ export const apiGet = <T>(endpoint: string, params?: Record<string, unknown>): P
       data: params,
       headers: getAuthHeaders(),
       success: (data: T) => resolve(data),
-      error: (xhr, status, error) => reject(handleApiError(error)),
+      error: (_xhr, _status, error) => reject(handleApiError(error)),
     });
   });
 };
@@ -65,7 +65,7 @@ export const apiPost = <T>(endpoint: string, data?: unknown): Promise<T> => {
       data: JSON.stringify(data),
       headers: getAuthHeaders(),
       success: (response: T) => resolve(response),
-      error: (xhr, status, error) => reject(handleApiError(error)),
+      error: (_xhr, _status, error) => reject(handleApiError(error)),
     });
   });
 };
@@ -82,7 +82,7 @@ export const apiPatch = <T>(endpoint: string, data?: unknown): Promise<T> => {
       data: JSON.stringify(data),
       headers: getAuthHeaders(),
       success: (response: T) => resolve(response),
-      error: (xhr, status, error) => reject(handleApiError(error)),
+      error: (_xhr, _status, error) => reject(handleApiError(error)),
     });
   });
 };
@@ -97,7 +97,7 @@ export const apiDelete = <T>(endpoint: string): Promise<T> => {
       method: 'DELETE',
       headers: getAuthHeaders(),
       success: (response: T) => resolve(response),
-      error: (xhr, status, error) => reject(handleApiError(error)),
+      error: (_xhr, _status, error) => reject(handleApiError(error)),
     });
   });
 };
