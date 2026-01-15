@@ -1,73 +1,101 @@
-# React + TypeScript + Vite
+# Contractify Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma web para generar y firmar contratos legales válidos mediante inteligencia artificial.
 
-Currently, two official plugins are available:
+## 🚀 Inicio Rápido
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerrequisitos
 
-## React Compiler
+- Node.js 18+
+- npm o yarn
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Instalación
 
-## Expanding the ESLint configuration
+```bash
+# Instalar dependencias
+npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# Configurar variables de entorno
+cp .env.example .env
+# Editar .env con tus valores
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Iniciar servidor de desarrollo
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La aplicación estará disponible en `http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📁 Estructura del Proyecto
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+├── components/       # Componentes reutilizables
+│   ├── ui/          # Componentes base (Button, Input, Card, etc.)
+│   ├── layout/      # Layouts (AuthLayout, MainLayout)
+│   └── contracts/   # Componentes específicos de contratos
+├── views/           # Páginas completas
+│   ├── public/      # Vistas públicas (Landing, Login, Register)
+│   └── private/     # Vistas privadas (Dashboard, Contracts, Settings)
+├── hooks/           # Custom hooks
+│   ├── api/         # Hooks para llamadas API
+│   └── utils/       # Hooks de utilidades
+├── services/        # Servicios API con AJAX
+├── utils/           # Utilidades y helpers
+├── types/           # Tipos TypeScript
+├── constants/       # Constantes (endpoints, rutas)
+└── routes/          # Configuración de rutas
+```
+
+## 🛠️ Stack Tecnológico
+
+- **React 18+** - Biblioteca UI
+- **TypeScript** - Tipado estático
+- **Vite** - Build tool
+- **React Router v6** - Routing
+- **React Hook Form + Zod** - Formularios y validación
+- **Tailwind CSS** - Estilos
+- **jQuery AJAX** - HTTP client
+
+## 📝 Scripts Disponibles
+
+```bash
+npm run dev      # Servidor de desarrollo
+npm run build    # Build de producción
+npm run preview  # Preview del build
+npm run lint     # Linter
+```
+
+## 🔧 Configuración
+
+### Variables de Entorno
+
+Ver `.env.example` para las variables necesarias:
+
+- `VITE_API_URL` - URL base de la API
+- `VITE_AZURE_AD_B2C_*` - Configuración de Azure AD B2C
+
+## 📚 Documentación
+
+- [TECH_DECISIONS.md](./TECH_DECISIONS.md) - Decisiones técnicas
+- [CHANGELOG.md](./CHANGELOG.md) - Historial de cambios
+- [.cursorrules](./.cursorrules) - Reglas del proyecto
+
+## 🎯 Estado del Proyecto
+
+Este proyecto está en fase de estructura inicial. Todos los archivos están creados como esqueletos con TODOs documentados. Ver [CHANGELOG.md](./CHANGELOG.md) para más detalles.
+
+## 📋 Próximos Pasos
+
+1. Implementar integración con backend API
+2. Completar formularios dinámicos
+3. Implementar generación de contratos con IA
+4. Completar sistema de firmas electrónicas
+5. Agregar tests
+
+## 🤝 Contribución
+
+Ver las reglas del proyecto en `.cursorrules` antes de contribuir.
+
+## 📄 Licencia
+
+[Especificar licencia]

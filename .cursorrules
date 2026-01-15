@@ -1,0 +1,306 @@
+# Contrato Legal AI Platform - Cursor Rules
+
+Experto en TypeScript, React 18, React Router DOM v6, React Hook Form, Zod, Tailwind CSS y arquitectura BFF.
+
+## Stack Obligatorio
+
+- **React 18+** - Componentes funcionales con hooks
+- **TypeScript** - Modo estricto
+- **React Router DOM v6** - Navegación
+- **React Hook Form + Zod** - Formularios y validación
+- **AJAX** - HTTP (NUNCA fetch)
+- **Tailwind CSS** - Estilos
+
+## Estructura de Carpetas
+
+```
+src/
+├── components/       # Componentes reutilizables
+│   ├── ui/          # Base (Button, Input, Card)
+│   ├── forms/       # Formularios específicos
+│   ├── layout/      # Header, Sidebar, Footer
+│   └── contracts/   # Específicos de contratos
+├── views/           # Páginas completas
+│   ├── public/      # Landing, Login, Register, SignGuest
+│   └── private/     # Dashboard, Contracts, Settings
+├── hooks/           # Custom hooks
+│   ├── api/         # Llamadas API (OBLIGATORIO)
+│   └── utils/       # Utilidades
+├── services/        # Servicios API con AJAX
+├── utils/           # Lógica de negocio
+├── types/           # TypeScript interfaces
+├── constants/       # Constantes
+└── routes/          # Configuración rutas
+```
+
+## Reglas Obligatorias
+
+### 1. Custom Hooks para API
+**CRÍTICO**: Todo llamado API necesita su hook en `/hooks/api/`
+
+```typescript
+// hooks/api/useLogin.ts
+export const useLogin = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const login = async (credentials: LoginRequest) => {
+    setIsLoading(true);
+    try {
+      return await loginService(credentials);
+    } catch (err) {
+      setError(err.message);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { login, isLoading, error };
+};
+```
+
+### 2. Servicios con AJAX
+**CRÍTICO**: Usar AJAX, NUNCA fetch
+
+```typescript
+// services/contracts.service.ts
+import $ from 'jquery';
+
+export const getContracts = (filters?: any): Promise<Contract[]> => {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: `${API_BASE}/contracts`,
+      method: 'GET',
+      data: filters,
+      headers: { 'Authorization': `Bearer ${token}` },
+      success: resolve,
+      error: reject
+    });
+  });
+};
+```
+
+### 3. React Hook Form + Zod
+**SIEMPRE** validar con Zod
+
+```typescript
+const schema = z.object({
+  email: z.string().email('Email inválido'),
+  password: z.string().min(8, 'Mínimo 8 caracteres')
+});
+
+type FormData = z.infer<typeof schema>;
+
+const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+  resolver: zodResolver(schema)
+});
+```
+
+### 4. Componentes Modulares
+
+```typescript
+// components/contracts/ContractCard.tsx
+interface ContractCardProps {
+  contract: Contract;
+  onView: (id: string) => void;
+}
+
+export const ContractCard: FC<ContractCardProps> = ({ contract, onView }) => {
+  return (
+    <div className="p-4 bg-white rounded-lg shadow">
+      <h3 className="text-xl font-bold">{contract.title}</h3>
+      <button onClick={() => onView(contract.id)}>Ver</button>
+    </div>
+  );
+};
+```
+
+### 5. Lógica en Utils
+
+```typescript
+// utils/contract.utils.ts
+export const getContractStatus = (contract: Contract): ContractStatus => {
+  const signedCount = contract.signatures.filter(s => s.signedAt).length;
+  if (signedCount === 0) return 'pending';
+  if (signedCount === contract.parties.length) return 'completed';
+  return 'partial';
+};
+```
+
+### 6. TypeScript Estricto
+
+```typescript
+// ✅ Correcto
+export interface Contract {
+  id: string;
+  type: ContractType;
+  status: ContractStatus;
+  parties: Party[];
+}
+
+export type ContractStatus = 'draft' | 'pending' | 'partial' | 'completed';
+
+// ❌ Evitar
+const data: any = await api();
+```
+
+### 7. React Router v6
+
+**CRÍTICO**: Configurar rutas en `routes/routes.tsx` con array de configuración
+
+```typescript
+// routes/routes.tsx
+import { ProtectRoute } from '@/components/ProtectRoute';
+import { MainLayout } from '@/components/MainLayout';
+
+export const routesConfig = [
+  // Rutas públicas
+  {
+    path: '/',
+    element: <Landing />
+  },
+  {
+    path: '/login',
+    element: <Login />
+  },
+  {
+    path: '/sign/:token',
+    element: <SignGuest />
+  },
+
+  // Rutas privadas con layout
+  {
+    element: (
+      <ProtectRoute>
+        <MainLayout />
+      </ProtectRoute>
+    ),
+    children: [
+      { path: '/dashboard', element: <Dashboard /> },
+      { path: '/contracts', element: <Contracts /> },
+      { path: '/contracts/:id', element: <ContractDetail /> },
+      { path: '/settings', element: <Settings /> }
+    ]
+  }
+];
+
+// App.tsx
+import { useRoutes } from 'react-router-dom';
+import { routesConfig } from './routes/routes';
+
+export const App = () => {
+  const routes = useRoutes(routesConfig);
+  return routes;
+};
+```
+
+### 8. Comentarios Concisos
+
+```typescript
+// ✅ Correcto
+// Auto-guarda borrador cada 30 segundos
+useEffect(() => {
+  const interval = setInterval(() => saveDraft(data), 30000);
+  return () => clearInterval(interval);
+}, [data]);
+
+// ❌ Evitar
+const name = 'John'; // Define el nombre
+```
+
+## Patrón Simple de Servicios
+
+### Servicios API básicos
+```typescript
+// services/contracts.service.ts
+const API_BASE = import.meta.env.VITE_API_URL;
+
+const getAuthHeaders = () => ({
+  'Authorization': `Bearer ${localStorage.getItem('token')}`
+});
+
+export const getContracts = (filters?: any): Promise<Contract[]> => {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: `${API_BASE}/contracts`,
+      method: 'GET',
+      data: filters,
+      headers: getAuthHeaders(),
+      success: resolve,
+      error: reject
+    });
+  });
+};
+
+export const createContract = (data: CreateContractRequest): Promise<Contract> => {
+  return new Promise((resolve, reject) => {
+    $.ajax({
+      url: `${API_BASE}/contracts`,
+      method: 'POST',
+      contentType: 'application/json',
+      data: JSON.stringify(data),
+      headers: getAuthHeaders(),
+      success: resolve,
+      error: reject
+    });
+  });
+};
+```
+
+## Convenciones
+
+### Nombres de archivos
+```
+✅ Correcto:
+- components/contracts/ContractCard.tsx
+- hooks/api/useGetContracts.ts
+- services/auth.service.ts
+- utils/validation/contract.validation.ts
+
+❌ Incorrecto:
+- ContractCard.jsx (usar .tsx)
+- getContracts.ts (sin prefijo use)
+- auth.ts (sin sufijo .service)
+```
+
+### Tailwind
+```typescript
+// ✅ Usar clases utility
+<div className="flex flex-col gap-4 p-6 bg-white rounded-lg">
+
+// ❌ Evitar inline styles
+<div style={{ display: 'flex', padding: '24px' }}>
+```
+
+## Checklist Nueva Vista
+
+- [ ] Crear carpeta en `views/public/` o `views/private/`
+- [ ] Crear custom hook API si necesita datos
+- [ ] Definir tipos en `types/`
+- [ ] Agregar ruta en router
+- [ ] Validación Zod si tiene formularios
+- [ ] Separar lógica en `utils/`
+- [ ] Comentar código
+- [ ] Extraer componentes reutilizables
+
+## NO Hacer
+
+❌ Usar fetch (usar AJAX)
+❌ Class components (solo funcionales)
+❌ Llamar APIs en componentes (crear hook)
+❌ Usar `any` (tipar correctamente)
+❌ Mezclar lógica con UI (separar en utils)
+❌ Omitir validación Zod
+❌ Inline styles (usar Tailwind)
+❌ Hardcodear valores (usar constantes)
+
+## Workflow
+
+1. Definir tipos/interfaces
+2. Crear servicios API con AJAX
+3. Crear custom hooks
+4. Crear componentes UI
+5. Ensamblar en vistas
+6. Implementar validación Zod
+7. Extraer lógica a utils
