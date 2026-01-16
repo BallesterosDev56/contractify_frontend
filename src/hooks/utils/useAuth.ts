@@ -1,48 +1,79 @@
 /**
- * Hook de utilidad para gestión de autenticación
+ * Hook de utilidad para gestión de autenticación con Firebase
  *
  * @description Proporciona funcionalidades de autenticación:
+ * - Escucha el estado de autenticación de Firebase
  * - Verificación de usuario autenticado
  * - Obtención de token
  * - Logout
- *
- * TODO: Implementar verificación de expiración de token
- * TODO: Implementar refresh automático de token
+ * - Refresh automático de token
  */
 
 import { useState, useEffect } from 'react';
-import { STORAGE_KEYS } from '@/constants/app.constants';
+import { onAuthStateChanged, type User as FirebaseUser } from 'firebase/auth';
+import { firebaseAuth } from '@/auth/firebase';
+import { logoutUser, getIdToken, mapFirebaseUserToAppUser } from '@/services/firebase.auth.service';
 import type { User } from '@/types';
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem(STORAGE_KEYS.TOKEN);
-    const storedUser = localStorage.getItem(STORAGE_KEYS.USER);
+    // Escuchar cambios en el estado de autenticación de Firebase
+    const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser: FirebaseUser | null) => {
+      setIsLoading(true);
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
-      try {
-        setUser(JSON.parse(storedUser));
+      if (firebaseUser) {
+        // Usuario autenticado
+        const appUser = mapFirebaseUserToAppUser(firebaseUser);
+        setUser(appUser);
         setIsAuthenticated(true);
-      } catch {
-        // TODO: Manejar error de parseo
+
+        // Obtener token de Firebase
+        try {
+          const idToken = await getIdToken();
+          setToken(idToken);
+        } catch (error) {
+          console.error('Error obteniendo token:', error);
+          setToken(null);
+        }
+      } else {
+        // Usuario no autenticado
+        setUser(null);
         setIsAuthenticated(false);
+        setToken(null);
       }
-    }
+
+      setIsLoading(false);
+    });
+
+    // Limpiar suscripción al desmontar
+    return () => unsubscribe();
   }, []);
 
-  const logout = () => {
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    setIsAuthenticated(false);
-    setUser(null);
-    setToken(null);
+  const logout = async () => {
+    try {
+      await logoutUser();
+      // El estado se actualizará automáticamente mediante onAuthStateChanged
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      throw error;
+    }
   };
 
-  return { isAuthenticated, user, token, logout };
+  const refreshToken = async () => {
+    try {
+      const newToken = await getIdToken(true);
+      setToken(newToken);
+      return newToken;
+    } catch (error) {
+      console.error('Error refrescando token:', error);
+      return null;
+    }
+  };
+
+  return { isAuthenticated, user, token, isLoading, logout, refreshToken };
 };

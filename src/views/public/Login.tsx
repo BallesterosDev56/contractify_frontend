@@ -1,17 +1,21 @@
 /**
  * Vista Login
  *
- * @description Página de inicio de sesión
- * TODO: Implementar formulario con React Hook Form + Zod
- * TODO: Integrar con Azure AD B2C
- * TODO: Agregar link a recuperar contraseña
+ * @description Página de inicio de sesión con Firebase Auth
+ * - Validación de formulario con React Hook Form + Zod
+ * - Integración con Firebase Authentication
+ * - Manejo de errores de autenticación
+ * - Redirección automática al dashboard tras login exitoso
  */
 
+import { useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useLogin } from '@/hooks/api/useLogin';
+import { Chrome } from 'lucide-react';
+import { useLogin, useGoogleLogin } from '@/hooks/api';
+import { useAuth } from '@/hooks/utils/useAuth';
 import { AuthLayout } from '@/components/layout/AuthLayout';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -27,6 +31,8 @@ type LoginFormData = z.infer<typeof loginSchema>;
 export const Login = () => {
   const navigate = useNavigate();
   const { login, isLoading, error } = useLogin();
+  const { login: loginWithGoogle, isLoading: isGoogleLoading, error: googleError } = useGoogleLogin();
+  const { isAuthenticated } = useAuth();
   const {
     register,
     handleSubmit,
@@ -35,12 +41,30 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
 
+  // Redirigir si ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    }
+  }, [isAuthenticated, navigate]);
+
   const onSubmit = async (data: LoginFormData) => {
-    const response = await login(data);
-    if (response) {
-      navigate(ROUTES.DASHBOARD);
+    const success = await login(data);
+    if (success) {
+      // La navegación se manejará automáticamente mediante el useEffect
+      navigate(ROUTES.DASHBOARD, { replace: true });
     }
   };
+
+  const handleGoogleLogin = async () => {
+    const success = await loginWithGoogle();
+    if (success) {
+      // La navegación se manejará automáticamente mediante el useEffect
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    }
+  };
+
+  const displayError = error || googleError;
 
   return (
     <AuthLayout>
@@ -49,15 +73,38 @@ export const Login = () => {
           <h2 className="text-2xl font-bold text-center">Iniciar sesión</h2>
         </div>
 
-        {error && (
+        {displayError && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
+            {displayError}
           </div>
         )}
+
+        <Button
+          type="button"
+          variant="outline"
+          fullWidth
+          isLoading={isGoogleLoading}
+          onClick={handleGoogleLogin}
+          className="flex items-center justify-center gap-2"
+        >
+          <Chrome className="w-5 h-5" />
+          Continuar con Google
+        </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">O continúa con email</span>
+          </div>
+        </div>
 
         <Input
           label="Email"
           type="email"
+          autoComplete="email"
+          placeholder="tu@email.com"
           {...register('email')}
           error={errors.email?.message}
         />
@@ -65,6 +112,8 @@ export const Login = () => {
         <Input
           label="Contraseña"
           type="password"
+          autoComplete="current-password"
+          placeholder="••••••••"
           {...register('password')}
           error={errors.password?.message}
         />
@@ -72,7 +121,7 @@ export const Login = () => {
         <div className="flex items-center justify-between">
           <Link
             to={ROUTES.RESET_PASSWORD}
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-sm text-blue-600 hover:text-blue-800 underline"
           >
             ¿Olvidaste tu contraseña?
           </Link>
@@ -84,7 +133,7 @@ export const Login = () => {
 
         <p className="text-center text-sm text-gray-600">
           ¿No tienes cuenta?{' '}
-          <Link to={ROUTES.REGISTER} className="text-blue-600 hover:text-blue-800">
+          <Link to={ROUTES.REGISTER} className="text-blue-600 hover:text-blue-800 underline">
             Regístrate
           </Link>
         </p>

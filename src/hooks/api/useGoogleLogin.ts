@@ -1,26 +1,25 @@
 /**
- * Hook para gestionar el inicio de sesión con Firebase
+ * Hook para gestionar el inicio de sesión con Google
  *
- * @description Maneja el flujo de autenticación:
- * - Validación de credenciales con Firebase Auth
+ * @description Maneja el flujo de autenticación con Google:
+ * - Autenticación mediante popup de Google
  * - El estado de autenticación se maneja automáticamente mediante useAuth
  * - Manejo de errores de autenticación
  */
 
 import { useState } from 'react';
-import { loginWithEmailAndPassword } from '@/services/firebase.auth.service';
-import type { LoginRequest } from '@/types';
+import { loginWithGoogle } from '@/services/firebase.auth.service';
 
-export const useLogin = () => {
+export const useGoogleLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const login = async (credentials: LoginRequest): Promise<boolean> => {
+  const login = async (): Promise<boolean> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const userCredential = await loginWithEmailAndPassword(credentials);
+      const userCredential = await loginWithGoogle();
       
       if (userCredential.user) {
         // El estado de autenticación se actualizará automáticamente mediante onAuthStateChanged
@@ -30,7 +29,7 @@ export const useLogin = () => {
       
       return false;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión con Google';
       setError(errorMessage);
       return false;
     } finally {
