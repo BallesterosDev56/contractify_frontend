@@ -7,24 +7,19 @@ import type { Signature, SignatureCertificate, Contract, Party } from './contrac
 export interface SignRequest {
   contractId: string;
   partyId: string;
-  consent: boolean;
-  ipAddress?: string;
-  userAgent?: string;
+  evidence?: SignatureEvidence; // Opcional según OpenAPI
 }
 
 export interface SignResponse {
-  signature: Signature;
-  certificate: SignatureCertificate;
+  signatureId: string;
   documentHash: string;
+  signedAt: string;
+  certificateUrl: string;
 }
 
 export interface SignGuestRequest {
   token: string;
-  name: string;
-  email: string;
-  consent: boolean;
-  ipAddress?: string;
-  userAgent?: string;
+  evidence?: SignatureEvidence; // Opcional según OpenAPI
 }
 
 export interface SignGuestResponse {
@@ -35,11 +30,8 @@ export interface SignGuestResponse {
 
 export interface SignatureToken {
   token: string;
-  contractId: string;
-  partyId: string;
-  email: string;
+  signUrl: string;
   expiresAt: string;
-  used: boolean;
 }
 
 export interface ValidateTokenRequest {
@@ -48,16 +40,14 @@ export interface ValidateTokenRequest {
 
 export interface ValidateTokenResponse {
   valid: boolean;
-  contract?: Contract;
-  party?: Party;
+  contractId?: string;
+  partyId?: string;
   expiresAt?: string;
 }
 
 export interface SignatureEvidence {
-  signatureId: string;
-  timestamp: string;
-  ipAddress: string;
-  userAgent: string;
-  documentHash: string;
-  certificate: SignatureCertificate;
+  ipAddress?: string;
+  userAgent?: string;
+  geolocation?: string;
+  signedAt?: string; // ISO date-time string
 }

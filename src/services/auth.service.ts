@@ -97,3 +97,5 @@ export const getSessionsService = (): Promise<Session[]> => {
 export const deleteSessionService = (sessionId: string): Promise<void> => {
   return apiDelete<void>(API_ENDPOINTS.USERS.DELETE_SESSION(sessionId));
 };
+
+// Note: getUserPreferences removed - only PATCH /users/preferences exists

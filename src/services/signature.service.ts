@@ -15,7 +15,6 @@ import type {
   SignResponse,
   SignGuestRequest,
   SignGuestResponse,
-  ValidateTokenRequest,
   ValidateTokenResponse,
   Signature,
   SignatureToken,
@@ -40,9 +39,10 @@ export const signGuestService = (data: SignGuestRequest): Promise<SignGuestRespo
 
 /**
  * Valida un token de firma de invitado
+ * Backend usa GET con query parameter, no POST con body
  */
-export const validateTokenService = (data: ValidateTokenRequest): Promise<ValidateTokenResponse> => {
-  return apiPost<ValidateTokenResponse>(API_ENDPOINTS.SIGNATURES.VALIDATE_TOKEN, data);
+export const validateTokenService = (token: string): Promise<ValidateTokenResponse> => {
+  return apiGet<ValidateTokenResponse>(API_ENDPOINTS.SIGNATURES.VALIDATE_TOKEN(token));
 };
 
 /**
@@ -54,8 +54,38 @@ export const getContractSignaturesService = (contractId: string): Promise<Signat
 
 /**
  * Crea un token de firma para un invitado
- * TODO: Implementar expiración configurable
+ * @param expiresInMinutes Opcional, default: 1440 (24 horas)
  */
-export const createSignatureTokenService = (contractId: string, partyId: string): Promise<SignatureToken> => {
-  return apiPost<SignatureToken>(API_ENDPOINTS.SIGNATURES.CREATE_TOKEN, { contractId, partyId });
+export const createSignatureTokenService = (
+  contractId: string,
+  partyId: string,
+  expiresInMinutes?: number
+): Promise<SignatureToken> => {
+  return apiPost<SignatureToken>(API_ENDPOINTS.SIGNATURES.CREATE_TOKEN, {
+    contractId,
+    partyId,
+    ...(expiresInMinutes && { expiresInMinutes })
+  });
+};
+
+/**
+ * Obtiene la evidencia de una firma
+ */
+export const getEvidenceService = async (signatureId: string): Promise<unknown> => {
+  return apiGet<unknown>(API_ENDPOINTS.SIGNATURES.EVIDENCE(signatureId));
+};
+
+/**
+ * Almacena evidencia de una firma
+ */
+export const storeEvidenceService = (signatureId: string, evidence: unknown): Promise<unknown> => {
+  return apiPost<unknown>(API_ENDPOINTS.SIGNATURES.EVIDENCE(signatureId), evidence);
+};
+
+/**
+ * Obtiene el certificado de una firma
+ */
+export const getCertificateService = (signatureId: string): Promise<Blob> => {
+  // Note: This may need special handling for blob responses
+  return apiGet<Blob>(API_ENDPOINTS.SIGNATURES.CERTIFICATE(signatureId));
 };

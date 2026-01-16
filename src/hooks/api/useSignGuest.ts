@@ -25,7 +25,7 @@ export const useSignGuest = () => {
     setError(null);
 
     try {
-      const response = await validateTokenService({ token });
+      const response = await validateTokenService(token);
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Token inválido o expirado';

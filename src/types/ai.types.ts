@@ -3,16 +3,11 @@
  */
 
 export interface GenerateContractRequest {
-  contractType: string;
-  formData: Record<string, unknown>;
-  context?: GenerationContext;
-}
-
-export interface GenerationContext {
-  jurisdiction?: string;
-  language?: string;
-  additionalClauses?: string[];
-  customInstructions?: string;
+  contractId: string; // Requerido por backend
+  templateId: string; // Requerido por backend
+  contractType: string; // Requerido por backend
+  jurisdiction?: string; // Opcional, default: 'CO'
+  inputs: Record<string, unknown>; // Backend espera 'inputs', no 'formData'
 }
 
 export interface GenerateContractResponse {
@@ -32,7 +27,7 @@ export interface GenerationMetadata {
 
 export interface ValidateInputRequest {
   contractType: string;
-  formData: Record<string, unknown>;
+  inputs: Record<string, unknown>; // Backend espera 'inputs', no 'formData'
 }
 
 export interface ValidateInputResponse {
@@ -49,8 +44,8 @@ export interface ValidationError {
 
 export interface RegenerateRequest {
   contractId: string;
-  instructions?: string;
-  regenerateSection?: string;
+  feedback: string; // Backend espera 'feedback', no 'instructions'
+  preserveStructure?: boolean; // Opcional
 }
 
 export interface RegenerateResponse {

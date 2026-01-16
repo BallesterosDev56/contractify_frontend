@@ -11,17 +11,14 @@ export interface SendInvitationRequest {
 }
 
 export interface SendInvitationResponse {
-  success: boolean;
-  token: string;
-  expiresAt: string;
+  invitationId: string;
+  sentAt: string; // ISO date-time string
 }
 
 export interface NotificationTemplate {
   id: string;
   name: string;
-  subject: string;
-  body: string;
-  type: 'signature_invitation' | 'reminder' | 'completed' | 'expired';
+  description: string;
 }
 
 export interface NotificationSettings {

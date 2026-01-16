@@ -8,3 +8,4 @@ export * from './ai.service';
 export * from './signature.service';
 export * from './notification.service';
 export * from './documents.service';
+export * from './audit.service';

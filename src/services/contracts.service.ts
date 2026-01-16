@@ -11,6 +11,7 @@
 
 import { apiGet, apiPost, apiPatch, apiDelete } from '@/utils/api.utils';
 import { API_ENDPOINTS } from '@/constants/api.constants';
+import { toBackend, toFrontend, adaptFilters, extractPaginated, toBackendStatus } from '@/utils/contractAdapters';
 import type {
   Contract,
   CreateContractRequest,
@@ -23,63 +24,88 @@ import type {
 
 /**
  * Obtiene la lista de contratos con filtros opcionales
- * TODO: Implementar paginación
- * TODO: Implementar ordenamiento
+ * Retorna items y paginación
  */
-export const getContractsService = (filters?: ContractFilters): Promise<Contract[]> => {
-  return apiGet<Contract[]>(API_ENDPOINTS.CONTRACTS.LIST, filters as Record<string, unknown>);
+export const getContractsService = async (filters?: ContractFilters): Promise<{ items: Contract[]; pagination: unknown | null }> => {
+  const adaptedFilters = adaptFilters((filters || {}) as Record<string, unknown>);
+  const response = await apiGet<{ data: Contract[]; pagination?: unknown } | Contract[]>(API_ENDPOINTS.CONTRACTS.LIST, adaptedFilters);
+  const { items, pagination } = extractPaginated<Contract>(response);
+  return { items: items.map(toFrontend) as Contract[], pagination };
 };
 
 /**
  * Obtiene un contrato por su ID
  */
-export const getContractService = (id: string): Promise<Contract> => {
-  return apiGet<Contract>(API_ENDPOINTS.CONTRACTS.GET(id));
+export const getContractService = async (contractId: string): Promise<Contract> => {
+  const response = await apiGet<Contract>(API_ENDPOINTS.CONTRACTS.GET(contractId));
+  return toFrontend(response) as Contract;
 };
 
 /**
  * Crea un nuevo contrato
  * TODO: Validar datos antes de enviar
  */
-export const createContractService = (data: CreateContractRequest): Promise<Contract> => {
-  return apiPost<Contract>(API_ENDPOINTS.CONTRACTS.CREATE, data);
+export const createContractService = async (data: CreateContractRequest): Promise<Contract> => {
+  const response = await apiPost<Contract>(API_ENDPOINTS.CONTRACTS.CREATE, toBackend(data));
+  return toFrontend(response) as Contract;
 };
 
 /**
  * Actualiza un contrato existente
  */
-export const updateContractService = (id: string, data: UpdateContractRequest): Promise<Contract> => {
-  return apiPatch<Contract>(API_ENDPOINTS.CONTRACTS.UPDATE(id), data);
+export const updateContractService = async (contractId: string, data: UpdateContractRequest): Promise<Contract> => {
+  const response = await apiPatch<Contract>(API_ENDPOINTS.CONTRACTS.UPDATE(contractId), toBackend(data));
+  return toFrontend(response) as Contract;
 };
 
 /**
  * Elimina un contrato
  * TODO: Implementar confirmación antes de eliminar
  */
-export const deleteContractService = (id: string): Promise<void> => {
-  return apiDelete<void>(API_ENDPOINTS.CONTRACTS.DELETE(id));
+export const deleteContractService = (contractId: string): Promise<void> => {
+  return apiDelete<void>(API_ENDPOINTS.CONTRACTS.DELETE(contractId));
 };
 
 /**
- * Guarda un borrador de contrato
- * TODO: Implementar auto-guardado cada 30 segundos
+ * Actualiza el contenido de un contrato (reemplaza saveDraft)
+ * @param contractId ID del contrato
+ * @param content Contenido del contrato
+ * @param source Origen del cambio ('USER' | 'AI') - Backend solo acepta USER o AI
  */
-export const saveDraftService = (id: string, data: Partial<UpdateContractRequest>): Promise<Contract> => {
-  return apiPatch<Contract>(API_ENDPOINTS.CONTRACTS.DRAFT(id), data);
+export const updateContentService = async (
+  contractId: string,
+  content: string,
+  source: 'USER' | 'AI' = 'USER'
+): Promise<Contract> => {
+  const response = await apiPatch<Contract>(API_ENDPOINTS.CONTRACTS.CONTENT(contractId), { content, source });
+  return toFrontend(response) as Contract;
+};
+
+/**
+ * @deprecated Use updateContentService instead
+ * Guarda un borrador de contrato (mantenido por compatibilidad)
+ */
+export const saveDraftService = async (contractId: string, data: Partial<UpdateContractRequest>): Promise<Contract> => {
+  const content = data.content || '';
+  return updateContentService(contractId, content, 'USER');
 };
 
 /**
  * Duplica un contrato existente
  */
-export const duplicateContractService = (id: string): Promise<Contract> => {
-  return apiPost<Contract>(API_ENDPOINTS.CONTRACTS.DUPLICATE(id));
+export const duplicateContractService = async (contractId: string): Promise<Contract> => {
+  const response = await apiPost<Contract>(API_ENDPOINTS.CONTRACTS.DUPLICATE(contractId));
+  return toFrontend(response) as Contract;
 };
 
 /**
  * Obtiene los contratos recientes del usuario
  */
-export const getRecentContractsService = (limit?: number): Promise<Contract[]> => {
-  return apiGet<Contract[]>(API_ENDPOINTS.CONTRACTS.RECENT, { limit });
+export const getRecentContractsService = async (limit?: number): Promise<Contract[]> => {
+  const filters = limit ? { pageSize: limit } : {};
+  const response = await apiGet<{ data: Contract[]; pagination?: unknown } | Contract[]>(API_ENDPOINTS.CONTRACTS.RECENT, filters);
+  const { items } = extractPaginated<Contract>(response);
+  return items.map(toFrontend) as Contract[];
 };
 
 /**
@@ -92,22 +118,84 @@ export const getContractStatsService = (): Promise<ContractStats> => {
 /**
  * Obtiene contratos pendientes de firma
  */
-export const getPendingContractsService = (): Promise<Contract[]> => {
-  return apiGet<Contract[]>(API_ENDPOINTS.CONTRACTS.PENDING);
+export const getPendingContractsService = async (): Promise<Contract[]> => {
+  const response = await apiGet<{ data: Contract[]; pagination?: unknown } | Contract[]>(API_ENDPOINTS.CONTRACTS.PENDING);
+  const { items } = extractPaginated<Contract>(response);
+  return items.map(toFrontend) as Contract[];
 };
 
 /**
  * Obtiene un contrato público (para firmas de invitados)
+ * Requiere token como query parameter según OpenAPI spec
  */
-export const getPublicContractService = (id: string): Promise<Contract> => {
-  return apiGet<Contract>(API_ENDPOINTS.CONTRACTS.PUBLIC(id));
+export const getPublicContractService = async (contractId: string, token: string): Promise<Contract> => {
+  const response = await apiGet<Contract>(API_ENDPOINTS.CONTRACTS.PUBLIC(contractId, token));
+  return toFrontend(response) as Contract;
 };
 
 /**
  * Obtiene el historial de versiones de un contrato
  */
-export const getContractVersionsService = (id: string): Promise<Contract[]> => {
-  return apiGet<Contract[]>(API_ENDPOINTS.CONTRACTS.VERSIONS(id));
+export const getContractVersionsService = async (contractId: string): Promise<Contract[]> => {
+  const response = await apiGet<{ data: Contract[]; pagination?: unknown } | Contract[]>(API_ENDPOINTS.CONTRACTS.VERSIONS(contractId));
+  const { items } = extractPaginated<Contract>(response);
+  return items.map(toFrontend) as Contract[];
+};
+
+/**
+ * Actualiza el estado de un contrato
+ */
+export const updateStatusService = async (
+  contractId: string,
+  status: string,
+  reason?: string
+): Promise<Contract> => {
+  const response = await apiPatch<Contract>(API_ENDPOINTS.CONTRACTS.STATUS(contractId), {
+    status: toBackendStatus(status),
+    ...(reason && { reason })
+  });
+  return toFrontend(response) as Contract;
+};
+
+/**
+ * Obtiene las partes (parties) de un contrato
+ */
+export const getPartiesService = async (contractId: string): Promise<unknown[]> => {
+  const response = await apiGet<unknown[]>(API_ENDPOINTS.CONTRACTS.PARTIES(contractId));
+  return Array.isArray(response) ? response : [];
+};
+
+/**
+ * Agrega una parte (party) a un contrato
+ */
+export const addPartyService = async (contractId: string, party: unknown): Promise<unknown> => {
+  const adaptedParty = toBackend({ parties: [party] } as { parties: unknown[] });
+  const adaptedParties = adaptedParty && typeof adaptedParty === 'object' && 'parties' in adaptedParty
+    ? (adaptedParty as { parties: unknown[] }).parties
+    : [party];
+  return apiPost<unknown>(API_ENDPOINTS.CONTRACTS.PARTIES(contractId), adaptedParties[0]);
+};
+
+/**
+ * Elimina una parte (party) de un contrato
+ */
+export const removePartyService = (contractId: string, partyId: string): Promise<void> => {
+  return apiDelete<void>(API_ENDPOINTS.CONTRACTS.PARTY(contractId, partyId));
+};
+
+/**
+ * Obtiene el historial de cambios de un contrato
+ */
+export const getHistoryService = async (contractId: string): Promise<unknown[]> => {
+  const response = await apiGet<unknown[]>(API_ENDPOINTS.CONTRACTS.HISTORY(contractId));
+  return Array.isArray(response) ? response : [];
+};
+
+/**
+ * Obtiene las transiciones de estado válidas para un contrato
+ */
+export const getContractTransitionsService = async (contractId: string): Promise<{ currentStatus: string; allowedTransitions: string[] }> => {
+  return apiGet<{ currentStatus: string; allowedTransitions: string[] }>(API_ENDPOINTS.CONTRACTS.TRANSITIONS(contractId));
 };
 
 /**
@@ -120,8 +208,15 @@ export const getContractTypesService = (): Promise<ContractTypeDefinition[]> => 
 /**
  * Obtiene las plantillas de contratos disponibles
  */
-export const getContractTemplatesService = (): Promise<Contract[]> => {
-  return apiGet<Contract[]>(API_ENDPOINTS.CONTRACTS.TEMPLATES);
+export const getContractTemplatesService = (filters?: { category?: string; jurisdiction?: string }): Promise<Contract[]> => {
+  return apiGet<Contract[]>(API_ENDPOINTS.CONTRACTS.TEMPLATES, filters);
+};
+
+/**
+ * Obtiene los detalles de una plantilla específica
+ */
+export const getContractTemplateService = (templateId: string): Promise<Contract> => {
+  return apiGet<Contract>(API_ENDPOINTS.CONTRACTS.TEMPLATE(templateId));
 };
 
 /**
@@ -132,9 +227,9 @@ export const getContractTypeSchemaService = (type: string): Promise<ContractForm
 };
 
 /**
- * Descarga múltiples contratos en un archivo comprimido
- * TODO: Implementar progreso de descarga
+ * Descarga múltiples contratos en un archivo comprimido (ZIP)
+ * Backend retorna application/zip según OpenAPI spec
  */
-export const bulkDownloadContractsService = (contractIds: string[], format: 'html' | 'pdf'): Promise<{ url: string }> => {
-  return apiPost<{ url: string }>(API_ENDPOINTS.CONTRACTS.BULK_DOWNLOAD, { contractIds, format });
+export const bulkDownloadContractsService = (contractIds: string[]): Promise<Blob> => {
+  return apiPost<Blob>(API_ENDPOINTS.CONTRACTS.BULK_DOWNLOAD, { contractIds });
 };

@@ -35,6 +35,13 @@ export interface Contract {
   createdBy: string; // User ID
   version: number;
   versions?: ContractVersion[];
+  // Campos adicionales de ContractDetail según OpenAPI spec
+  documentUrl?: string; // URL del documento PDF generado
+  documentHash?: string; // Hash del documento para verificación
+  templateId?: string; // ID de la plantilla usada
+  contractType?: string; // Tipo de contrato (backend field)
+  ownerUserId?: string; // ID del propietario del contrato
+  signedAt?: string; // Fecha de firma completa
 }
 
 export interface Party {
@@ -75,6 +82,7 @@ export interface ContractMetadata {
 export interface ContractVersion {
   version: number;
   content: string;
+  source?: 'AI' | 'USER'; // Origen del cambio según OpenAPI spec
   createdAt: string;
   createdBy: string;
 }
@@ -102,6 +110,15 @@ export interface ContractFilters {
   dateTo?: string;
   page?: number;
   limit?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  totalItems: number; // Backend retorna 'totalItems', no 'total'
+  totalPages: number;
 }
 
 export interface ContractStats {

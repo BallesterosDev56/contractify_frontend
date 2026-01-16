@@ -30,3 +30,32 @@ export const sendInvitationService = (data: SendInvitationRequest): Promise<Send
 export const getNotificationTemplatesService = (): Promise<NotificationTemplate[]> => {
   return apiGet<NotificationTemplate[]>(API_ENDPOINTS.NOTIFICATIONS.TEMPLATES);
 };
+
+/**
+ * Cancela una invitación
+ */
+export const cancelInvitationService = (invitationId: string): Promise<unknown> => {
+  return apiPost<unknown>(API_ENDPOINTS.NOTIFICATIONS.CANCEL_INVITATION(invitationId));
+};
+
+/**
+ * Reenvía una invitación
+ */
+export const resendInvitationService = (invitationId: string): Promise<unknown> => {
+  return apiPost<unknown>(API_ENDPOINTS.NOTIFICATIONS.RESEND_INVITATION(invitationId));
+};
+
+/**
+ * Programa un recordatorio
+ */
+export const scheduleReminderService = (
+  contractId: string,
+  partyId: string,
+  scheduleAt: string
+): Promise<unknown> => {
+  return apiPost<unknown>(API_ENDPOINTS.NOTIFICATIONS.SCHEDULE_REMINDER, {
+    contractId,
+    partyId,
+    scheduleAt
+  });
+};

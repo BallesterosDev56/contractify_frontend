@@ -1,0 +1,2171 @@
+openapi: 3.0.3
+info:
+  title: Contractify API
+  description: |
+    Documentación de la API utilizada por el frontend de Contractify.
+    Esta especificación describe todos los endpoints y sus contratos de datos según el uso en el frontend.
+  version: 1.0.0
+  contact:
+    name: Contractify Team
+
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor de desarrollo local
+  - url: ${VITE_API_URL}/api
+    description: Servidor de producción (variable de entorno)
+
+tags:
+  - name: Auth
+    description: Endpoints de autenticación
+  - name: Users
+    description: Gestión de usuarios
+  - name: Contracts
+    description: Operaciones CRUD de contratos
+  - name: AI
+    description: Generación de contratos mediante IA
+  - name: Signatures
+    description: Firmas electrónicas
+  - name: Notifications
+    description: Notificaciones e invitaciones
+  - name: Documents
+    description: Generación y descarga de documentos
+  - name: Audit
+    description: Auditoría y trazabilidad
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtenido del endpoint de login
+
+  schemas:
+    # Auth Schemas
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    LoginResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        token:
+          type: string
+        refreshToken:
+          type: string
+
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        firstName:
+          type: string
+        lastName:
+          type: string
+
+    RegisterResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        message:
+          type: string
+
+    ResetPasswordRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+
+    ConfirmResetPasswordRequest:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+        newPassword:
+          type: string
+          format: password
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+
+    # User Schemas
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        emailVerified:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        preferences:
+          $ref: '#/components/schemas/UserPreferences'
+
+    UserPreferences:
+      type: object
+      properties:
+        language:
+          type: string
+        timezone:
+          type: string
+        notifications:
+          $ref: '#/components/schemas/NotificationSettings'
+
+    NotificationSettings:
+      type: object
+      properties:
+        email:
+          type: boolean
+        contractUpdates:
+          type: boolean
+        signatureReminders:
+          type: boolean
+
+    Session:
+      type: object
+      properties:
+        id:
+          type: string
+        device:
+          type: string
+        ipAddress:
+          type: string
+        lastActivity:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    ChangePasswordRequest:
+      type: object
+      required:
+        - currentPassword
+        - newPassword
+      properties:
+        currentPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+
+    # Contract Schemas
+    ContractType:
+      type: string
+      enum:
+        - service
+        - employment
+        - nda
+        - partnership
+        - supplier
+        - client
+        - lease
+        - custom
+
+    ContractStatus:
+      type: string
+      enum:
+        - draft
+        - pending
+        - partial
+        - completed
+        - cancelled
+        - expired
+
+    Contract:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          $ref: '#/components/schemas/ContractType'
+        title:
+          type: string
+        status:
+          $ref: '#/components/schemas/ContractStatus'
+        content:
+          type: string
+          description: HTML content
+        htmlContent:
+          type: string
+          description: Formatted HTML
+        parties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Party'
+        signatures:
+          type: array
+          items:
+            $ref: '#/components/schemas/Signature'
+        metadata:
+          $ref: '#/components/schemas/ContractMetadata'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+        version:
+          type: integer
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractVersion'
+
+    Party:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum:
+            - signer
+            - viewer
+            - creator
+        signedAt:
+          type: string
+          format: date-time
+        signatureOrder:
+          type: integer
+
+    Signature:
+      type: object
+      properties:
+        id:
+          type: string
+        contractId:
+          type: string
+        partyId:
+          type: string
+        partyEmail:
+          type: string
+          format: email
+        signedAt:
+          type: string
+          format: date-time
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+        documentHash:
+          type: string
+        certificate:
+          $ref: '#/components/schemas/SignatureCertificate'
+
+    SignatureCertificate:
+      type: object
+      properties:
+        hash:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        issuer:
+          type: string
+
+    ContractMetadata:
+      type: object
+      properties:
+        templateId:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        notes:
+          type: string
+        expirationDate:
+          type: string
+          format: date-time
+        autoExpire:
+          type: boolean
+
+    ContractVersion:
+      type: object
+      properties:
+        version:
+          type: integer
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+
+    CreateContractRequest:
+      type: object
+      required:
+        - type
+        - title
+        - parties
+        - formData
+      properties:
+        type:
+          $ref: '#/components/schemas/ContractType'
+        title:
+          type: string
+        parties:
+          type: array
+          items:
+            type: object
+            required:
+              - name
+              - email
+              - role
+            properties:
+              name:
+                type: string
+              email:
+                type: string
+                format: email
+              role:
+                type: string
+                enum:
+                  - signer
+                  - viewer
+                  - creator
+              signatureOrder:
+                type: integer
+        formData:
+          type: object
+          additionalProperties: true
+        metadata:
+          $ref: '#/components/schemas/ContractMetadata'
+
+    UpdateContractRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        parties:
+          type: array
+          items:
+            $ref: '#/components/schemas/Party'
+        metadata:
+          $ref: '#/components/schemas/ContractMetadata'
+
+    ContractFilters:
+      type: object
+      properties:
+        status:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractStatus'
+        type:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContractType'
+        search:
+          type: string
+        dateFrom:
+          type: string
+          format: date
+        dateTo:
+          type: string
+          format: date
+        page:
+          type: integer
+        limit:
+          type: integer
+        sortBy:
+          type: string
+        sortOrder:
+          type: string
+          enum:
+            - asc
+            - desc
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+
+    ContractsListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Contract'
+        pagination:
+          $ref: '#/components/schemas/PaginationInfo'
+
+    ContractStats:
+      type: object
+      properties:
+        total:
+          type: integer
+        draft:
+          type: integer
+        pending:
+          type: integer
+        partial:
+          type: integer
+        completed:
+          type: integer
+        cancelled:
+          type: integer
+
+    ContractTypeDefinition:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/ContractType'
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        schema:
+          $ref: '#/components/schemas/ContractFormSchema'
+
+    ContractFormSchema:
+      type: object
+      properties:
+        fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/FormField'
+        required:
+          type: array
+          items:
+            type: string
+
+    FormField:
+      type: object
+      properties:
+        name:
+          type: string
+        label:
+          type: string
+        type:
+          type: string
+          enum:
+            - text
+            - email
+            - number
+            - date
+            - select
+            - textarea
+            - checkbox
+        placeholder:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              value:
+                type: string
+              label:
+                type: string
+        validation:
+          $ref: '#/components/schemas/FieldValidation'
+
+    FieldValidation:
+      type: object
+      properties:
+        min:
+          type: number
+        max:
+          type: number
+        pattern:
+          type: string
+        message:
+          type: string
+
+    UpdateContentRequest:
+      type: object
+      required:
+        - content
+        - source
+      properties:
+        content:
+          type: string
+        source:
+          type: string
+          enum:
+            - USER
+            - AI
+
+    UpdateStatusRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          type: string
+        reason:
+          type: string
+
+    BulkDownloadRequest:
+      type: object
+      required:
+        - contractIds
+        - format
+      properties:
+        contractIds:
+          type: array
+          items:
+            type: string
+        format:
+          type: string
+          enum:
+            - html
+            - pdf
+
+    BulkDownloadResponse:
+      type: object
+      properties:
+        url:
+          type: string
+
+    # AI Schemas
+    GenerateContractRequest:
+      type: object
+      required:
+        - contractId
+        - templateId
+        - contractType
+        - inputs
+      properties:
+        contractId:
+          type: string
+        templateId:
+          type: string
+        contractType:
+          type: string
+        jurisdiction:
+          type: string
+          default: CO
+        inputs:
+          type: object
+          additionalProperties: true
+
+    GenerateContractResponse:
+      type: object
+      properties:
+        content:
+          type: string
+        htmlContent:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/GenerationMetadata'
+        contractId:
+          type: string
+
+    GenerationMetadata:
+      type: object
+      properties:
+        model:
+          type: string
+        tokensUsed:
+          type: integer
+        generationTime:
+          type: number
+        confidence:
+          type: number
+        sources:
+          type: array
+          items:
+            type: string
+
+    AIJobResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+        pollUrl:
+          type: string
+
+    AIJobStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - PENDING
+            - IN_PROGRESS
+            - COMPLETED
+            - FAILED
+        progress:
+          type: number
+        result:
+          type: object
+        error:
+          type: string
+
+    RegenerateRequest:
+      type: object
+      required:
+        - contractId
+        - feedback
+      properties:
+        contractId:
+          type: string
+        feedback:
+          type: string
+        preserveStructure:
+          type: boolean
+
+    RegenerateResponse:
+      type: object
+      properties:
+        content:
+          type: string
+        htmlContent:
+          type: string
+        version:
+          type: integer
+
+    ValidateInputRequest:
+      type: object
+      required:
+        - contractType
+        - formData
+      properties:
+        contractType:
+          type: string
+        formData:
+          type: object
+          additionalProperties: true
+
+    ValidateInputResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+        suggestions:
+          type: array
+          items:
+            type: string
+
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+        severity:
+          type: string
+          enum:
+            - error
+            - warning
+            - info
+
+    # Signature Schemas
+    SignRequest:
+      type: object
+      required:
+        - contractId
+        - partyId
+        - consent
+      properties:
+        contractId:
+          type: string
+        partyId:
+          type: string
+        consent:
+          type: boolean
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+
+    SignResponse:
+      type: object
+      properties:
+        signature:
+          $ref: '#/components/schemas/Signature'
+        certificate:
+          $ref: '#/components/schemas/SignatureCertificate'
+        documentHash:
+          type: string
+
+    SignGuestRequest:
+      type: object
+      required:
+        - token
+        - name
+        - email
+        - consent
+      properties:
+        token:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        consent:
+          type: boolean
+        ipAddress:
+          type: string
+        userAgent:
+          type: string
+
+    SignGuestResponse:
+      type: object
+      properties:
+        signature:
+          $ref: '#/components/schemas/Signature'
+        certificate:
+          $ref: '#/components/schemas/SignatureCertificate'
+        contract:
+          $ref: '#/components/schemas/Contract'
+
+    SignatureToken:
+      type: object
+      properties:
+        token:
+          type: string
+        contractId:
+          type: string
+        partyId:
+          type: string
+        email:
+          type: string
+          format: email
+        expiresAt:
+          type: string
+          format: date-time
+        used:
+          type: boolean
+
+    ValidateTokenResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        contract:
+          $ref: '#/components/schemas/Contract'
+        party:
+          $ref: '#/components/schemas/Party'
+        expiresAt:
+          type: string
+          format: date-time
+
+    CreateSignatureTokenRequest:
+      type: object
+      required:
+        - contractId
+        - partyId
+      properties:
+        contractId:
+          type: string
+        partyId:
+          type: string
+
+    # Notification Schemas
+    SendInvitationRequest:
+      type: object
+      required:
+        - contractId
+        - partyId
+        - email
+      properties:
+        contractId:
+          type: string
+        partyId:
+          type: string
+        email:
+          type: string
+          format: email
+        message:
+          type: string
+        templateId:
+          type: string
+
+    SendInvitationResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        token:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+
+    NotificationTemplate:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        subject:
+          type: string
+        body:
+          type: string
+        type:
+          type: string
+          enum:
+            - signature_invitation
+            - reminder
+            - completed
+            - expired
+
+    ScheduleReminderRequest:
+      type: object
+      required:
+        - contractId
+        - partyId
+        - scheduleAt
+      properties:
+        contractId:
+          type: string
+        partyId:
+          type: string
+        scheduleAt:
+          type: string
+          format: date-time
+
+    # Document Schemas
+    GeneratePDFRequest:
+      type: object
+      required:
+        - contractId
+      properties:
+        contractId:
+          type: string
+        includeWatermark:
+          type: boolean
+        includeSignatures:
+          type: boolean
+
+    GeneratePDFResponse:
+      type: object
+      properties:
+        documentId:
+          type: string
+        url:
+          type: string
+        hash:
+          type: string
+        size:
+          type: integer
+
+    DocumentJobResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+        pollUrl:
+          type: string
+
+    DocumentJobStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - PENDING
+            - IN_PROGRESS
+            - COMPLETED
+            - FAILED
+        progress:
+          type: number
+        result:
+          type: object
+        error:
+          type: string
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+        code:
+          type: string
+        details:
+          type: object
+
+paths:
+  # Auth Endpoints
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Iniciar sesión
+      description: Autentica un usuario con email y contraseña
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Credenciales inválidas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrar nuevo usuario
+      description: Crea una nueva cuenta de usuario
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterResponse'
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Cerrar sesión
+      description: Cierra la sesión del usuario actual
+      responses:
+        '200':
+          description: Sesión cerrada exitosamente
+        '401':
+          description: No autenticado
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Auth
+      summary: Solicitar recuperación de contraseña
+      description: Envía un email con instrucciones para recuperar la contraseña
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Email de recuperación enviado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/confirm-reset:
+    post:
+      tags:
+        - Auth
+      summary: Confirmar recuperación de contraseña
+      description: Confirma la recuperación de contraseña con el token recibido
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmResetPasswordRequest'
+      responses:
+        '200':
+          description: Contraseña actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /auth/refresh-token:
+    post:
+      tags:
+        - Auth
+      summary: Refrescar token
+      description: Obtiene un nuevo token de acceso usando el refresh token
+      security: []
+      responses:
+        '200':
+          description: Token refrescado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+
+  # User Endpoints
+  /users/me:
+    get:
+      tags:
+        - Users
+      summary: Obtener usuario actual
+      description: Retorna la información del usuario autenticado
+      responses:
+        '200':
+          description: Información del usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          description: No autenticado
+
+    patch:
+      tags:
+        - Users
+      summary: Actualizar usuario actual
+      description: Actualiza la información del usuario autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Usuario actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+
+  /users/change-password:
+    post:
+      tags:
+        - Users
+      summary: Cambiar contraseña
+      description: Cambia la contraseña del usuario autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Contraseña cambiada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+
+  /users/me/sessions:
+    get:
+      tags:
+        - Users
+      summary: Obtener sesiones activas
+      description: Retorna todas las sesiones activas del usuario
+      responses:
+        '200':
+          description: Lista de sesiones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Session'
+
+  /users/me/sessions/{sessionId}:
+    delete:
+      tags:
+        - Users
+      summary: Eliminar sesión
+      description: Elimina una sesión específica del usuario
+      parameters:
+        - name: sessionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Sesión eliminada exitosamente
+        '404':
+          description: Sesión no encontrada
+
+  /users/me/preferences:
+    patch:
+      tags:
+        - Users
+      summary: Actualizar preferencias del usuario
+      description: Actualiza las preferencias del usuario autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserPreferences'
+      responses:
+        '200':
+          description: Preferencias actualizadas exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserPreferences'
+
+  # Contract Endpoints
+  /contracts:
+    get:
+      tags:
+        - Contracts
+      summary: Listar contratos
+      description: Obtiene la lista de contratos con filtros opcionales y paginación
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: array
+            items:
+              type: string
+        - name: type
+          in: query
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/ContractType'
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: fromDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: toDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+        - name: sortBy
+          in: query
+          schema:
+            type: string
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        '200':
+          description: Lista de contratos
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ContractsListResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Contract'
+
+    post:
+      tags:
+        - Contracts
+      summary: Crear contrato
+      description: Crea un nuevo contrato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContractRequest'
+      responses:
+        '201':
+          description: Contrato creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+
+  /contracts/recent:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener contratos recientes
+      description: Retorna los contratos más recientes del usuario
+      parameters:
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de contratos recientes
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ContractsListResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Contract'
+
+  /contracts/stats:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener estadísticas de contratos
+      description: Retorna estadísticas agregadas de los contratos del usuario
+      responses:
+        '200':
+          description: Estadísticas de contratos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractStats'
+
+  /contracts/pending:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener contratos pendientes
+      description: Retorna los contratos pendientes de firma
+      responses:
+        '200':
+          description: Lista de contratos pendientes
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/ContractsListResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Contract'
+
+  /contracts/types:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener tipos de contrato
+      description: Retorna todos los tipos de contrato disponibles
+      responses:
+        '200':
+          description: Lista de tipos de contrato
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContractTypeDefinition'
+
+  /contracts/templates:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener plantillas de contratos
+      description: Retorna las plantillas de contratos disponibles
+      responses:
+        '200':
+          description: Lista de plantillas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Contract'
+
+  /contracts/types/{type}/schema:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener schema de formulario
+      description: Retorna el schema del formulario para un tipo de contrato específico
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ContractType'
+      responses:
+        '200':
+          description: Schema del formulario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContractFormSchema'
+
+  /contracts/bulk-download:
+    post:
+      tags:
+        - Contracts
+      summary: Descarga masiva de contratos
+      description: Genera un archivo comprimido con múltiples contratos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDownloadRequest'
+      responses:
+        '200':
+          description: URL de descarga generada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkDownloadResponse'
+
+  /contracts/{contractId}:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener contrato por ID
+      description: Retorna un contrato específico por su ID
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contrato encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+        '404':
+          description: Contrato no encontrado
+
+    patch:
+      tags:
+        - Contracts
+      summary: Actualizar contrato
+      description: Actualiza un contrato existente
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContractRequest'
+      responses:
+        '200':
+          description: Contrato actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+
+    delete:
+      tags:
+        - Contracts
+      summary: Eliminar contrato
+      description: Elimina un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contrato eliminado exitosamente
+        '404':
+          description: Contrato no encontrado
+
+  /contracts/{contractId}/content:
+    patch:
+      tags:
+        - Contracts
+      summary: Actualizar contenido del contrato
+      description: Actualiza el contenido HTML de un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContentRequest'
+      responses:
+        '200':
+          description: Contenido actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+
+  /contracts/{contractId}/status:
+    patch:
+      tags:
+        - Contracts
+      summary: Actualizar estado del contrato
+      description: Actualiza el estado de un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusRequest'
+      responses:
+        '200':
+          description: Estado actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+
+  /contracts/{contractId}/parties:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener partes del contrato
+      description: Retorna todas las partes (parties) de un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de partes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Party'
+
+    post:
+      tags:
+        - Contracts
+      summary: Agregar parte al contrato
+      description: Agrega una nueva parte (party) a un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Party'
+      responses:
+        '201':
+          description: Parte agregada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Party'
+
+  /contracts/{contractId}/parties/{partyId}:
+    delete:
+      tags:
+        - Contracts
+      summary: Eliminar parte del contrato
+      description: Elimina una parte (party) de un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: partyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Parte eliminada exitosamente
+        '404':
+          description: Parte no encontrada
+
+  /contracts/{contractId}/history:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener historial del contrato
+      description: Retorna el historial de cambios de un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Historial del contrato
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /contracts/{contractId}/duplicate:
+    post:
+      tags:
+        - Contracts
+      summary: Duplicar contrato
+      description: Crea una copia de un contrato existente
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Contrato duplicado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+
+  /contracts/{contractId}/public:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener contrato público
+      description: Retorna un contrato público para firmas de invitados (sin autenticación)
+      security: []
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Contrato público
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Contract'
+
+  /contracts/{contractId}/versions:
+    get:
+      tags:
+        - Contracts
+      summary: Obtener versiones del contrato
+      description: Retorna el historial de versiones de un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de versiones
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Contract'
+                      pagination:
+                        $ref: '#/components/schemas/PaginationInfo'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Contract'
+
+  /contracts/{contractId}/signatures:
+    get:
+      tags:
+        - Signatures
+      summary: Obtener firmas del contrato
+      description: Retorna todas las firmas de un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de firmas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Signature'
+
+  # AI Endpoints
+  /ai/generate-contract:
+    post:
+      tags:
+        - AI
+      summary: Generar contrato con IA
+      description: |
+        Genera un contrato usando IA basado en el tipo y datos del formulario.
+        Puede retornar 202 Accepted con jobId si es asíncrono, en cuyo caso se debe hacer polling al endpoint /ai/jobs/{jobId}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateContractRequest'
+      responses:
+        '200':
+          description: Contrato generado exitosamente (síncrono)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenerateContractResponse'
+        '202':
+          description: Job creado (asíncrono)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIJobResponse'
+
+  /ai/regenerate:
+    post:
+      tags:
+        - AI
+      summary: Regenerar contenido del contrato
+      description: |
+        Regenera el contenido de un contrato existente usando IA con feedback del usuario.
+        Puede retornar 202 Accepted con jobId si es asíncrono.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegenerateRequest'
+      responses:
+        '200':
+          description: Contenido regenerado exitosamente (síncrono)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegenerateResponse'
+        '202':
+          description: Job creado (asíncrono)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIJobResponse'
+
+  /ai/validate-input:
+    post:
+      tags:
+        - AI
+      summary: Validar datos del formulario
+      description: Valida los datos del formulario antes de generar el contrato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateInputRequest'
+      responses:
+        '200':
+          description: Resultado de la validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateInputResponse'
+
+  /ai/jobs/{jobId}:
+    get:
+      tags:
+        - AI
+      summary: Obtener estado del job de IA
+      description: Retorna el estado de un job de generación de IA (para polling)
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Estado del job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIJobStatus'
+
+  # Signature Endpoints
+  /signatures/sign:
+    post:
+      tags:
+        - Signatures
+      summary: Firmar contrato (usuario autenticado)
+      description: Firma un contrato como usuario autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignRequest'
+      responses:
+        '200':
+          description: Contrato firmado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignResponse'
+
+  /signatures/sign-guest:
+    post:
+      tags:
+        - Signatures
+      summary: Firmar contrato (invitado)
+      description: Firma un contrato como invitado usando un token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignGuestRequest'
+      responses:
+        '200':
+          description: Contrato firmado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignGuestResponse'
+
+  /signatures/validate-token:
+    get:
+      tags:
+        - Signatures
+      summary: Validar token de firma
+      description: Valida un token de firma de invitado
+      security: []
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Token válido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateTokenResponse'
+
+  /signatures/create-token:
+    post:
+      tags:
+        - Signatures
+      summary: Crear token de firma
+      description: Crea un token de firma para un invitado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSignatureTokenRequest'
+      responses:
+        '201':
+          description: Token creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignatureToken'
+
+  /signatures/{signatureId}/evidence:
+    get:
+      tags:
+        - Signatures
+      summary: Obtener evidencia de firma
+      description: Retorna la evidencia de una firma específica
+      parameters:
+        - name: signatureId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Evidencia de firma
+          content:
+            application/json:
+              schema:
+                type: object
+
+    post:
+      tags:
+        - Signatures
+      summary: Almacenar evidencia de firma
+      description: Almacena evidencia adicional de una firma
+      parameters:
+        - name: signatureId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Evidencia almacenada exitosamente
+
+  /signatures/{signatureId}/certificate:
+    get:
+      tags:
+        - Signatures
+      summary: Obtener certificado de firma
+      description: Retorna el certificado de una firma en formato binario
+      parameters:
+        - name: signatureId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Certificado de firma
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+
+  # Notification Endpoints
+  /notifications/send-invitation:
+    post:
+      tags:
+        - Notifications
+      summary: Enviar invitación para firmar
+      description: Envía una invitación por email para firmar un contrato
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendInvitationRequest'
+      responses:
+        '200':
+          description: Invitación enviada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendInvitationResponse'
+
+  /notifications/templates:
+    get:
+      tags:
+        - Notifications
+      summary: Obtener plantillas de notificaciones
+      description: Retorna las plantillas de notificaciones disponibles
+      responses:
+        '200':
+          description: Lista de plantillas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NotificationTemplate'
+
+  /notifications/invitations/{invitationId}/cancel:
+    post:
+      tags:
+        - Notifications
+      summary: Cancelar invitación
+      description: Cancela una invitación pendiente
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invitación cancelada exitosamente
+
+  /notifications/invitations/{invitationId}/resend:
+    post:
+      tags:
+        - Notifications
+      summary: Reenviar invitación
+      description: Reenvía una invitación existente
+      parameters:
+        - name: invitationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invitación reenviada exitosamente
+
+  /notifications/reminders:
+    post:
+      tags:
+        - Notifications
+      summary: Programar recordatorio
+      description: Programa un recordatorio para una firma pendiente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ScheduleReminderRequest'
+      responses:
+        '200':
+          description: Recordatorio programado exitosamente
+
+  # Document Endpoints
+  /documents/generate-pdf:
+    post:
+      tags:
+        - Documents
+      summary: Generar PDF del contrato
+      description: |
+        Genera un PDF a partir de un contrato.
+        Puede retornar 202 Accepted con jobId si es asíncrono, en cuyo caso se debe hacer polling al endpoint /documents/jobs/{jobId}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GeneratePDFRequest'
+      responses:
+        '200':
+          description: PDF generado exitosamente (síncrono)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeneratePDFResponse'
+        '202':
+          description: Job creado (asíncrono)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentJobResponse'
+
+  /documents/{documentId}/download:
+    get:
+      tags:
+        - Documents
+      summary: Descargar documento
+      description: Descarga un documento específico (HTML o PDF)
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Documento descargado
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            text/html:
+              schema:
+                type: string
+
+  /documents/{documentId}/verify:
+    post:
+      tags:
+        - Documents
+      summary: Verificar documento
+      description: Verifica la integridad de un documento
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Documento verificado
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /documents/jobs/{jobId}:
+    get:
+      tags:
+        - Documents
+      summary: Obtener estado del job de documentos
+      description: Retorna el estado de un job de generación de documentos (para polling)
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Estado del job
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DocumentJobStatus'
+
+  # Audit Endpoints
+  /audit/contracts/{contractId}/trail:
+    get:
+      tags:
+        - Audit
+      summary: Obtener trail de auditoría
+      description: Retorna el trail de auditoría completo de un contrato
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Trail de auditoría
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+  /audit/contracts/{contractId}/export:
+    get:
+      tags:
+        - Audit
+      summary: Exportar trail de auditoría
+      description: Exporta el trail de auditoría de un contrato en formato descargable
+      parameters:
+        - name: contractId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Archivo de auditoría exportado
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: object

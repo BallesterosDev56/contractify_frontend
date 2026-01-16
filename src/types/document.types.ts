@@ -15,8 +15,7 @@ export interface Document {
 
 export interface GeneratePDFRequest {
   contractId: string;
-  includeWatermark?: boolean;
-  includeSignatures?: boolean;
+  includeAuditPage?: boolean; // Backend espera 'includeAuditPage', default: true
 }
 
 export interface GeneratePDFResponse {
@@ -33,12 +32,7 @@ export interface DownloadRequest {
 }
 
 export interface BulkDownloadRequest {
-  contractIds: string[];
-  format: 'html' | 'pdf';
+  contractIds: string[]; // Backend solo espera contractIds según OpenAPI
 }
 
-export interface BulkDownloadResponse {
-  downloadId: string;
-  url: string;
-  expiresAt: string;
-}
+// Backend retorna application/zip (blob), no JSON según OpenAPI spec

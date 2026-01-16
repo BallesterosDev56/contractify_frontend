@@ -6,7 +6,6 @@
  * - Paginación
  * - Actualización automática
  *
- * TODO: Implementar paginación
  * TODO: Implementar caché de resultados
  * TODO: Implementar actualización automática cuando cambian los filtros
  */
@@ -17,6 +16,7 @@ import type { Contract, ContractFilters } from '@/types';
 
 export const useGetContracts = (filters?: ContractFilters) => {
   const [contracts, setContracts] = useState<Contract[]>([]);
+  const [pagination, setPagination] = useState<unknown | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,8 +25,9 @@ export const useGetContracts = (filters?: ContractFilters) => {
     setError(null);
 
     try {
-      const data = await getContractsService(filters);
-      setContracts(data);
+      const { items, pagination: pag } = await getContractsService(filters);
+      setContracts(items);
+      setPagination(pag);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error al obtener contratos';
       setError(errorMessage);
@@ -39,5 +40,5 @@ export const useGetContracts = (filters?: ContractFilters) => {
     fetchContracts();
   }, [filters]);
 
-  return { contracts, isLoading, error, refetch: fetchContracts };
+  return { contracts, pagination, isLoading, error, refetch: fetchContracts };
 };
