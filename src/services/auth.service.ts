@@ -4,7 +4,6 @@
  * Maneja todas las operaciones relacionadas con autenticación:
  * - Login
  * - Registro
- * - Verificación de email
  * - Recuperación de contraseña
  * - Gestión de sesiones
  */
@@ -16,7 +15,6 @@ import type {
   LoginResponse,
   RegisterRequest,
   RegisterResponse,
-  VerifyEmailRequest,
   ResetPasswordRequest,
   ConfirmResetPasswordRequest,
   ChangePasswordRequest,
@@ -49,20 +47,6 @@ export const registerService = (data: RegisterRequest): Promise<RegisterResponse
  */
 export const logoutService = (): Promise<void> => {
   return apiPost<void>(API_ENDPOINTS.AUTH.LOGOUT);
-};
-
-/**
- * Verifica el email del usuario con el token recibido
- */
-export const verifyEmailService = (data: VerifyEmailRequest): Promise<{ success: boolean }> => {
-  return apiPost<{ success: boolean }>(API_ENDPOINTS.AUTH.VERIFY_EMAIL, data);
-};
-
-/**
- * Reenvía el email de verificación
- */
-export const resendVerificationService = (): Promise<{ success: boolean }> => {
-  return apiPost<{ success: boolean }>(API_ENDPOINTS.AUTH.RESEND_VERIFICATION);
 };
 
 /**

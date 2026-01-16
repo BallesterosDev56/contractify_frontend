@@ -4,8 +4,7 @@
  * @description Página de registro de nuevos usuarios con Firebase Auth
  * - Validación completa con React Hook Form + Zod
  * - Registro con Firebase Authentication
- * - Envío automático de email de verificación
- * - Redirección a página de verificación tras registro exitoso
+ * - Redirección al dashboard tras registro exitoso
  */
 
 import { useEffect } from 'react';
@@ -73,8 +72,8 @@ export const Register = () => {
     const { confirmPassword, ...registerData } = data;
     const success = await registerUser(registerData);
     if (success) {
-      // Redirigir a página de verificación de email
-      navigate(ROUTES.VERIFY_EMAIL, { replace: true });
+      // Redirigir al dashboard tras registro exitoso
+      navigate(ROUTES.DASHBOARD, { replace: true });
     }
   };
 

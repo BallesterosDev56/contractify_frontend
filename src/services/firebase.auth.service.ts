@@ -5,7 +5,6 @@
  * - Login con email y contraseña
  * - Login con Google (popup)
  * - Registro de nuevos usuarios
- * - Verificación de email
  * - Recuperación de contraseña
  * - Gestión de tokens y estado de autenticación
  */
@@ -14,7 +13,6 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
-  sendEmailVerification,
   signOut,
   updateProfile,
   signInWithPopup,
@@ -98,7 +96,6 @@ export const loginWithGoogle = async (): Promise<UserCredential> => {
 /**
  * Registra un nuevo usuario con email y contraseña
  * Actualiza el perfil con nombre y apellido
- * Envía email de verificación automáticamente
  */
 export const registerWithEmailAndPassword = async (
   data: RegisterRequest
@@ -115,14 +112,6 @@ export const registerWithEmailAndPassword = async (
     await updateProfile(userCredential.user, {
       displayName: `${data.firstName} ${data.lastName}`,
     });
-
-    // Enviar email de verificación
-    if (userCredential.user && !userCredential.user.emailVerified) {
-      await sendEmailVerification(userCredential.user, {
-        url: `${window.location.origin}/verify-email`,
-        handleCodeInApp: false,
-      });
-    }
 
     return userCredential;
   } catch (error: unknown) {
@@ -148,34 +137,6 @@ export const sendPasswordReset = async (email: string): Promise<void> => {
       // Silenciar el error para no revelar emails registrados
       return;
     }
-    const message = getFirebaseErrorMessage(firebaseError.code);
-    throw new Error(message);
-  }
-};
-
-/**
- * Reenvía el email de verificación
- */
-export const resendEmailVerification = async (): Promise<void> => {
-  try {
-    const user = firebaseAuth.currentUser;
-    if (!user) {
-      throw new Error('No hay usuario autenticado');
-    }
-
-    if (user.emailVerified) {
-      throw new Error('Tu email ya está verificado');
-    }
-
-    await sendEmailVerification(user, {
-      url: `${window.location.origin}/verify-email`,
-      handleCodeInApp: false,
-    });
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      throw error;
-    }
-    const firebaseError = error as { code: string; message: string };
     const message = getFirebaseErrorMessage(firebaseError.code);
     throw new Error(message);
   }

@@ -5,7 +5,6 @@
  * - Validación de datos del formulario
  * - Creación de cuenta con Firebase Auth
  * - Actualización de perfil con nombre y apellido
- * - Envío automático de email de verificación
  */
 
 import { useState } from 'react';
@@ -25,7 +24,6 @@ export const useRegister = () => {
       
       if (userCredential.user) {
         // El estado de autenticación se actualizará automáticamente mediante onAuthStateChanged
-        // El email de verificación se envía automáticamente en el servicio
         return true;
       }
       

@@ -14,7 +14,6 @@ import { ROUTES } from '@/constants/app.constants';
 import { Landing } from '@/views/public/Landing';
 import { Login } from '@/views/public/Login';
 import { Register } from '@/views/public/Register';
-import { VerifyEmail } from '@/views/public/VerifyEmail';
 import { ResetPassword } from '@/views/public/ResetPassword';
 import { SignGuest } from '@/views/public/SignGuest';
 
@@ -41,10 +40,6 @@ export const routesConfig = [
   {
     path: ROUTES.REGISTER,
     element: <Register />,
-  },
-  {
-    path: ROUTES.VERIFY_EMAIL,
-    element: <VerifyEmail />,
   },
   {
     path: ROUTES.RESET_PASSWORD,

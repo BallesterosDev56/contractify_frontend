@@ -6,7 +6,6 @@ export * from './useLogin';
 export * from './useGoogleLogin';
 export * from './useRegister';
 export * from './useResetPassword';
-export * from './useEmailVerification';
 export * from './useGetContracts';
 export * from './useGetContract';
 export * from './useCreateContract';
