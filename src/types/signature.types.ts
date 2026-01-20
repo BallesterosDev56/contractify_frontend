@@ -2,7 +2,7 @@
  * Tipos relacionados con firmas electrónicas
  */
 
-import type { Signature, SignatureCertificate, Contract, Party } from './contract.types';
+import type { Signature, SignatureCertificate, Contract } from './contract.types';
 
 export interface SignRequest {
   contractId: string;

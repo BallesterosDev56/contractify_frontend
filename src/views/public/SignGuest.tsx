@@ -34,10 +34,7 @@ export const SignGuest = () => {
     if (!token || !consent) return;
 
     await signGuest({
-      token,
-      name,
-      email,
-      consent,
+      token
     });
   };
 
