@@ -33,9 +33,7 @@ export const SignGuest = () => {
   const handleSign = async () => {
     if (!token || !consent) return;
 
-    await signGuest({
-      token
-    });
+    await signGuest({token});
   };
 
   if (isValidating) {
