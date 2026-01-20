@@ -9,6 +9,7 @@
  */
 
 import { useEffect } from 'react';
+import { getIdToken } from '@/services/firebase.auth.service';
 import { useNavigate, Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -52,6 +53,11 @@ export const Login = () => {
     const success = await login(data);
     if (success) {
       // La navegación se manejará automáticamente mediante el useEffect
+      //obtenemos el token de la respuesta y lo logueamos
+      const token = await getIdToken();
+      if (token) {
+        console.log('Token:', token);
+      }
       navigate(ROUTES.DASHBOARD, { replace: true });
     }
   };
