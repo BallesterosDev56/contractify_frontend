@@ -23,7 +23,7 @@ cp .env.example .env
 npm run dev
 ```
 
-La aplicación estará disponible en `http://localhost:5173`
+La aplicación estará disponible en `https://contractify-frontend.vercel.app`
 
 ## 📁 Estructura del Proyecto
 
