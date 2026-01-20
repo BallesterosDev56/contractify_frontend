@@ -5,15 +5,8 @@
 export const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
 
 export const API_ENDPOINTS = {
-  // Auth
-  AUTH: {
-    LOGIN: '/auth/login',
-    REGISTER: '/auth/register',
-    LOGOUT: '/auth/logout',
-    RESET_PASSWORD: '/auth/reset-password',
-    CONFIRM_RESET: '/auth/confirm-reset',
-    REFRESH_TOKEN: '/auth/refresh-token',
-  },
+  // Note: Auth endpoints removed - Firebase handles authentication directly
+  // The BFF only validates Firebase tokens via Bearer token in Authorization header
 
   // Users
   USERS: {

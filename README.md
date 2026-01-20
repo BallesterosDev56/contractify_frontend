@@ -39,7 +39,7 @@ src/
 ├── hooks/           # Custom hooks
 │   ├── api/         # Hooks para llamadas API
 │   └── utils/       # Hooks de utilidades
-├── services/        # Servicios API con AJAX
+├── services/        # Servicios API con Axios
 ├── utils/           # Utilidades y helpers
 ├── types/           # Tipos TypeScript
 ├── constants/       # Constantes (endpoints, rutas)
@@ -54,7 +54,7 @@ src/
 - **React Router v6** - Routing
 - **React Hook Form + Zod** - Formularios y validación
 - **Tailwind CSS** - Estilos
-- **jQuery AJAX** - HTTP client
+- **Axios** - HTTP client
 
 ## 📝 Scripts Disponibles
 

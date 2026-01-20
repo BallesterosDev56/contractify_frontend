@@ -1,67 +1,38 @@
 /**
  * Servicio de autenticación
  *
- * Maneja todas las operaciones relacionadas con autenticación:
- * - Login
- * - Registro
- * - Recuperación de contraseña
- * - Gestión de sesiones
+ * NOTA: La autenticación se maneja completamente con Firebase Auth.
+ * Este servicio solo contiene funciones relacionadas con la gestión de usuarios
+ * que requieren comunicación con el BFF (como actualizar perfil, cambiar contraseña, etc.)
+ *
+ * Para login, registro y logout, usar los servicios de Firebase directamente:
+ * - @/services/firebase.auth.service
+ * - @/hooks/api/useLogin
+ * - @/hooks/api/useRegister
  */
 
 import { apiPost, apiGet, apiPatch, apiDelete } from '@/utils/api.utils';
 import { API_ENDPOINTS } from '@/constants/api.constants';
 import type {
-  LoginRequest,
-  LoginResponse,
-  RegisterRequest,
-  RegisterResponse,
-  ResetPasswordRequest,
-  ConfirmResetPasswordRequest,
   ChangePasswordRequest,
   User,
   Session,
 } from '@/types';
 
-/**
- * Inicia sesión con email y contraseña
- * TODO: Implementar integración con Azure AD B2C OAuth
- * TODO: Manejar refresh token automático
- */
-export const loginService = (credentials: LoginRequest): Promise<LoginResponse> => {
-  return apiPost<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
-};
-
-/**
- * Registra un nuevo usuario
- * TODO: Validar formato de email antes de enviar
- * TODO: Implementar verificación de fortaleza de contraseña
- */
-export const registerService = (data: RegisterRequest): Promise<RegisterResponse> => {
-  return apiPost<RegisterResponse>(API_ENDPOINTS.AUTH.REGISTER, data);
-};
-
-/**
- * Cierra sesión del usuario actual
- * TODO: Invalidar token en el backend
- * TODO: Limpiar datos locales
- */
-export const logoutService = (): Promise<void> => {
-  return apiPost<void>(API_ENDPOINTS.AUTH.LOGOUT);
-};
-
-/**
- * Solicita recuperación de contraseña
- */
-export const resetPasswordService = (data: ResetPasswordRequest): Promise<{ success: boolean }> => {
-  return apiPost<{ success: boolean }>(API_ENDPOINTS.AUTH.RESET_PASSWORD, data);
-};
-
-/**
- * Confirma la recuperación de contraseña con el token
- */
-export const confirmResetPasswordService = (data: ConfirmResetPasswordRequest): Promise<{ success: boolean }> => {
-  return apiPost<{ success: boolean }>(API_ENDPOINTS.AUTH.CONFIRM_RESET, data);
-};
+// Auth endpoints removed - Firebase handles authentication directly
+// The following endpoints don't exist in the OpenAPI spec (docu.yaml):
+// - /auth/login
+// - /auth/register
+// - /auth/logout
+// - /auth/reset-password
+// - /auth/confirm-reset
+// - /auth/refresh-token
+//
+// Use Firebase Auth services instead:
+// - loginWithEmailAndPassword() from @/services/firebase.auth.service
+// - registerWithEmailAndPassword() from @/services/firebase.auth.service
+// - logoutUser() from @/services/firebase.auth.service
+// - sendPasswordReset() from @/services/firebase.auth.service
 
 /**
  * Obtiene la información del usuario actual
