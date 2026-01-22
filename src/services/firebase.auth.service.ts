@@ -235,8 +235,7 @@ export const mapFirebaseUserToAppUser = (firebaseUser: FirebaseUser | null): App
     email,
     firstName,
     lastName,
-    emailVerified: firebaseUser.emailVerified,
+    role: 'USER',
     createdAt,
-    updatedAt,
   };
 };
