@@ -209,19 +209,13 @@ export const mapFirebaseUserToAppUser = (firebaseUser: FirebaseUser | null): App
     firstName = 'Usuario';
   }
 
-  // Obtener fechas de creación y actualización desde metadata
   // Firebase metadata puede tener creationTime y lastSignInTime como strings o null
   const creationTime = firebaseUser.metadata.creationTime;
-  const lastSignInTime = firebaseUser.metadata.lastSignInTime;
 
   // Convertir a ISO string o usar fecha actual como fallback
   const createdAt = creationTime
     ? new Date(creationTime).toISOString()
     : new Date().toISOString();
-
-  const updatedAt = lastSignInTime
-    ? new Date(lastSignInTime).toISOString()
-    : createdAt;
 
   // Validar que el email existe (debería siempre existir en usuarios autenticados)
   const email = firebaseUser.email;
