@@ -176,7 +176,7 @@ export const getIdToken = async (forceRefresh = false): Promise<string | null> =
  *
  * @description Mapea el usuario de Firebase a nuestro tipo User de la aplicación:
  * - Extrae firstName y lastName del displayName de forma segura
- * - Obtiene fechas desde metadata de Firebase
+ * - Obtiene fechas desde metadata_ de Firebase
  * - Maneja valores nulos/undefined correctamente
  * - Retorna null si no hay usuario de Firebase
  */

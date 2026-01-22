@@ -13,7 +13,7 @@ export interface GenerateContractRequest {
 export interface GenerateContractResponse {
   content: string; // HTML content
   htmlContent: string; // Formatted HTML
-  metadata: GenerationMetadata;
+  metadata_: GenerationMetadata;
   contractId?: string; // Si se guarda automáticamente
 }
 

@@ -29,7 +29,7 @@ export interface Contract {
   htmlContent?: string; // Formatted HTML
   parties: Party[];
   signatures: Signature[];
-  metadata: ContractMetadata;
+  metadata_: ContractMetadata;
   createdAt: string;
   updatedAt: string;
   createdBy: string; // User ID
@@ -92,14 +92,14 @@ export interface CreateContractRequest {
   title: string;
   parties: Omit<Party, 'id' | 'signedAt'>[];
   formData: Record<string, unknown>;
-  metadata?: Partial<ContractMetadata>;
+  metadata_?: Partial<ContractMetadata>;
 }
 
 export interface UpdateContractRequest {
   title?: string;
   content?: string;
   parties?: Omit<Party, 'id' | 'signedAt'>[];
-  metadata?: Partial<ContractMetadata>;
+  metadata_?: Partial<ContractMetadata>;
 }
 
 export interface ContractFilters {

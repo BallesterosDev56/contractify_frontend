@@ -243,7 +243,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Signature'
-        metadata:
+        metadata_:
           $ref: '#/components/schemas/ContractMetadata'
         createdAt:
           type: string
@@ -384,7 +384,7 @@ components:
         formData:
           type: object
           additionalProperties: true
-        metadata:
+        metadata_:
           $ref: '#/components/schemas/ContractMetadata'
 
     UpdateContractRequest:
@@ -398,7 +398,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Party'
-        metadata:
+        metadata_:
           $ref: '#/components/schemas/ContractMetadata'
 
     ContractFilters:
@@ -614,7 +614,7 @@ components:
           type: string
         htmlContent:
           type: string
-        metadata:
+        metadata_:
           $ref: '#/components/schemas/GenerationMetadata'
         contractId:
           type: string
