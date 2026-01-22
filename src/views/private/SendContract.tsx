@@ -30,7 +30,6 @@ export const SendContract = () => {
     await sendInvitation({
       contractId: contract.id,
       partyId: '', // TODO
-      email,
       message,
     });
   };
