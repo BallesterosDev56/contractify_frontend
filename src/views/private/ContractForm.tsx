@@ -44,12 +44,14 @@ export const ContractForm = () => {
   //   // Guardar borrador
   // }, formData);
 
-  const onSubmit = async (data: unknown) => {
+  const onSubmit = async () => {
+    // CreateContractRequest alineado con OpenAPI: title, templateId, contractType
+    // TODO: Obtener templateId real del tipo de contrato seleccionado
+    // TODO: Obtener title del formulario dinámico basado en schema
     const contract = await createContract({
-      type: type as any,
       title: 'Nuevo contrato', // TODO: Obtener del formulario
-      parties: [], // TODO: Obtener del formulario
-      formData: data as Record<string, unknown>,
+      templateId: type || 'default', // TODO: Obtener templateId correcto del tipo
+      contractType: type || '', // contractType es el tipo de contrato
     });
 
     if (contract) {

@@ -2,15 +2,15 @@
  * Tipos relacionados con autenticación y usuarios
  */
 
+// User alineado con OpenAPI User schema
 export interface User {
   id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  emailVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
-  preferences?: UserPreferences;
+  email: string; // format: email
+  firstName?: string; // nullable
+  lastName?: string; // nullable
+  role: string; // default: 'USER'
+  preferences?: Record<string, unknown>; // nullable, tipo object genérico
+  createdAt?: string; // nullable, ISO date-time
 }
 
 export interface UserPreferences {
@@ -62,10 +62,17 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+// Session alineado con OpenAPI Session schema
 export interface Session {
   id: string;
-  device: string;
-  ipAddress: string;
-  lastActivity: string;
-  createdAt: string;
+  ipAddress?: string; // nullable
+  userAgent?: string; // nullable
+  createdAt: string; // ISO date-time
+  lastActivityAt?: string; // nullable, ISO date-time
+}
+
+// UpdateUserRequest alineado con OpenAPI
+export interface UpdateUserRequest {
+  firstName?: string; // nullable
+  lastName?: string; // nullable
 }

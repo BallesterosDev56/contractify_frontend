@@ -44,25 +44,34 @@ export interface Contract {
   signedAt?: string; // Fecha de firma completa
 }
 
+// Party alineado con OpenAPI ContractParty
 export interface Party {
   id: string;
+  role: 'HOST' | 'GUEST' | 'WITNESS'; // Backend usa estos valores
   name: string;
-  email: string;
-  role: 'signer' | 'viewer' | 'creator';
-  signedAt?: string;
-  signatureOrder?: number; // Para firmas secuenciales
+  email: string; // format: email
+  signatureStatus?: 'PENDING' | 'INVITED' | 'SIGNED'; // SignatureStatus del backend
+  signedAt?: string; // ISO date-time, nullable
+  order?: number; // Signing order (1-based), nullable, default: 1
 }
 
+// Request para agregar una party - alineado con AddPartyRequest
+export interface AddPartyRequest {
+  role: 'HOST' | 'GUEST' | 'WITNESS';
+  name: string;
+  email: string;
+  order?: number; // Opcional, default: 1
+}
+
+// Signature alineado con OpenAPI app__modules__contracts__schemas__Signature
 export interface Signature {
   id: string;
-  contractId: string;
   partyId: string;
-  partyEmail: string;
-  signedAt: string;
-  ipAddress: string;
-  userAgent: string;
-  documentHash: string;
-  certificate?: SignatureCertificate;
+  partyName?: string; // nullable
+  role?: string; // nullable
+  signedAt?: string; // nullable, ISO date-time
+  ipAddress?: string; // nullable
+  documentHash?: string; // nullable
 }
 
 export interface SignatureCertificate {
@@ -87,19 +96,16 @@ export interface ContractVersion {
   createdBy: string;
 }
 
+// CreateContractRequest alineado con OpenAPI
 export interface CreateContractRequest {
-  type: ContractType;
-  title: string;
-  parties: Omit<Party, 'id' | 'signedAt'>[];
-  formData: Record<string, unknown>;
-  metadata_?: Partial<ContractMetadata>;
+  title: string; // Requerido, minLength: 3
+  templateId: string; // Requerido
+  contractType: string; // Requerido (backend usa string, no enum)
 }
 
+// UpdateContractRequest alineado con OpenAPI
 export interface UpdateContractRequest {
-  title?: string;
-  content?: string;
-  parties?: Omit<Party, 'id' | 'signedAt'>[];
-  metadata_?: Partial<ContractMetadata>;
+  title?: string; // Opcional, nullable
 }
 
 export interface ContractFilters {
@@ -121,13 +127,12 @@ export interface PaginationInfo {
   totalPages: number;
 }
 
+// ContractStats alineado con OpenAPI
 export interface ContractStats {
   total: number;
-  draft: number;
-  pending: number;
-  partial: number;
-  completed: number;
-  cancelled: number;
+  byStatus: Record<string, number>; // Mapa de status -> count
+  pendingSignatures: number;
+  signedThisMonth: number;
 }
 
 export interface ContractTypeDefinition {

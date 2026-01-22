@@ -43,18 +43,21 @@ export const getContractService = async (contractId: string): Promise<Contract> 
 
 /**
  * Crea un nuevo contrato
- * TODO: Validar datos antes de enviar
+ * CreateContractRequest alineado con OpenAPI: title, templateId, contractType
  */
 export const createContractService = async (data: CreateContractRequest): Promise<Contract> => {
-  const response = await apiPost<Contract>(API_ENDPOINTS.CONTRACTS.CREATE, toBackend(data));
+  // No usar toBackend porque CreateContractRequest ya está alineado con OpenAPI
+  const response = await apiPost<Contract>(API_ENDPOINTS.CONTRACTS.CREATE, data);
   return toFrontend(response) as Contract;
 };
 
 /**
  * Actualiza un contrato existente
+ * UpdateContractRequest alineado con OpenAPI: solo title nullable
  */
 export const updateContractService = async (contractId: string, data: UpdateContractRequest): Promise<Contract> => {
-  const response = await apiPatch<Contract>(API_ENDPOINTS.CONTRACTS.UPDATE(contractId), toBackend(data));
+  // No usar toBackend porque UpdateContractRequest ya está alineado con OpenAPI
+  const response = await apiPatch<Contract>(API_ENDPOINTS.CONTRACTS.UPDATE(contractId), data);
   return toFrontend(response) as Contract;
 };
 
@@ -84,9 +87,9 @@ export const updateContentService = async (
 /**
  * @deprecated Use updateContentService instead
  * Guarda un borrador de contrato (mantenido por compatibilidad)
+ * NOTA: UpdateContractRequest ya no incluye 'content' según OpenAPI
  */
-export const saveDraftService = async (contractId: string, data: Partial<UpdateContractRequest>): Promise<Contract> => {
-  const content = data.content || '';
+export const saveDraftService = async (contractId: string, content: string): Promise<Contract> => {
   return updateContentService(contractId, content, 'USER');
 };
 

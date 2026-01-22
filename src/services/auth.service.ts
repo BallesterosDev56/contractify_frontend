@@ -43,8 +43,9 @@ export const getCurrentUserService = (): Promise<User> => {
 
 /**
  * Actualiza la información del usuario actual
+ * Solo acepta firstName y lastName (nullable) según OpenAPI UpdateUserRequest
  */
-export const updateUserService = (data: Partial<User>): Promise<User> => {
+export const updateUserService = (data: { firstName?: string; lastName?: string }): Promise<User> => {
   return apiPatch<User>(API_ENDPOINTS.USERS.UPDATE, data);
 };
 

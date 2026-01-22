@@ -36,31 +36,26 @@ export const toFrontendStatus = (status: string): string => {
 };
 
 /**
- * Convierte rol del frontend al formato del backend
+ * DEPRECATED: Los roles ahora se usan directamente en formato backend (HOST, GUEST, WITNESS)
+ * El frontend debe usar los valores del backend directamente según OpenAPI
  */
 export const toBackendRole = (role: string): string => {
-  const map: Record<string, string> = {
-    'signer': 'GUEST',
-    'creator': 'HOST',
-    'viewer': 'WITNESS'
-  };
-  return map[role.toLowerCase()] || role.toUpperCase();
+  // Ya no necesitamos conversión, los tipos están alineados
+  return role;
 };
 
 /**
- * Convierte rol del backend al formato del frontend
+ * DEPRECATED: Los roles ahora se usan directamente en formato backend (HOST, GUEST, WITNESS)
+ * El frontend debe usar los valores del backend directamente según OpenAPI
  */
 export const toFrontendRole = (role: string): string => {
-  const map: Record<string, string> = {
-    'HOST': 'creator',
-    'GUEST': 'signer',
-    'WITNESS': 'viewer'
-  };
-  return map[role.toUpperCase()] || role.toLowerCase();
+  // Ya no necesitamos conversión, los tipos están alineados
+  return role;
 };
 
 /**
  * Convierte datos del frontend al formato del backend
+ * NOTA: Los roles ya no se convierten porque el frontend ahora usa los valores correctos del backend
  */
 export const toBackend = <T>(data: T | null | undefined): T | null | undefined => {
   if (!data || typeof data !== 'object') return data;
@@ -72,17 +67,13 @@ export const toBackend = <T>(data: T | null | undefined): T | null | undefined =
     ...rest,
     ...(type && { contractType: type }),
     ...(status && { status: toBackendStatus(status) }),
-    ...(parties && {
-      parties: parties.map(p => ({
-        ...p,
-        role: p.role ? toBackendRole(p.role) : p.role
-      }))
-    })
+    ...(parties && { parties }) // Ya no necesitamos convertir roles
   } as T;
 };
 
 /**
  * Convierte datos del backend al formato del frontend
+ * NOTA: Los roles ya no se convierten porque el frontend ahora usa los valores correctos del backend
  */
 export const toFrontend = <T>(data: T | null | undefined): T | null | undefined => {
   if (!data || typeof data !== 'object') return data;
@@ -94,12 +85,7 @@ export const toFrontend = <T>(data: T | null | undefined): T | null | undefined 
     ...rest,
     ...(contractType && { type: contractType }),
     ...(status && { status: toFrontendStatus(status) }),
-    ...(parties && {
-      parties: parties.map(p => ({
-        ...p,
-        role: p.role ? toFrontendRole(p.role) : p.role
-      }))
-    })
+    ...(parties && { parties }) // Ya no necesitamos convertir roles
   } as T;
 };
 

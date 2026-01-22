@@ -10,19 +10,18 @@ export interface GenerateContractRequest {
   inputs: Record<string, unknown>; // Backend espera 'inputs', no 'formData'
 }
 
+// GenerateContractResponse alineado con OpenAPI AIGenerateResponse
 export interface GenerateContractResponse {
-  content: string; // HTML content
-  htmlContent: string; // Formatted HTML
-  metadata_: GenerationMetadata;
-  contractId?: string; // Si se guarda automáticamente
+  content: string; // Generated HTML content
+  placeholders?: Record<string, string>; // default: {}
+  metadata_?: AIGenerateMetadata; // nullable
 }
 
-export interface GenerationMetadata {
-  model: string;
-  tokensUsed: number;
-  generationTime: number;
-  confidence?: number;
-  sources?: string[];
+// AIGenerateMetadata alineado con OpenAPI
+export interface AIGenerateMetadata {
+  model?: string; // nullable
+  promptVersion?: string; // nullable
+  confidenceScore?: number; // nullable
 }
 
 export interface ValidateInputRequest {
@@ -30,16 +29,11 @@ export interface ValidateInputRequest {
   inputs: Record<string, unknown>; // Backend espera 'inputs', no 'formData'
 }
 
+// ValidateInputResponse alineado con OpenAPI
 export interface ValidateInputResponse {
   valid: boolean;
-  errors: ValidationError[];
-  suggestions?: string[];
-}
-
-export interface ValidationError {
-  field: string;
-  message: string;
-  severity: 'error' | 'warning' | 'info';
+  warnings?: string[]; // Array de strings, default: []
+  errors?: string[]; // Array de strings, default: []
 }
 
 export interface RegenerateRequest {
@@ -48,8 +42,9 @@ export interface RegenerateRequest {
   preserveStructure?: boolean; // Opcional
 }
 
+// RegenerateResponse usa AIGenerateResponse según OpenAPI
 export interface RegenerateResponse {
-  content: string;
-  htmlContent: string;
-  version: number;
+  content: string; // Generated HTML content
+  placeholders?: Record<string, string>; // default: {}
+  metadata_?: AIGenerateMetadata; // nullable
 }

@@ -39,16 +39,16 @@ export const Dashboard = () => {
             <p className="text-2xl font-bold">{stats.total}</p>
           </Card>
           <Card>
-            <p className="text-sm text-gray-600">Pendientes</p>
-            <p className="text-2xl font-bold">{stats.pending}</p>
+            <p className="text-sm text-gray-600">En Firma</p>
+            <p className="text-2xl font-bold">{stats.byStatus['SIGNING'] || 0}</p>
           </Card>
           <Card>
-            <p className="text-sm text-gray-600">Parciales</p>
-            <p className="text-2xl font-bold">{stats.partial}</p>
+            <p className="text-sm text-gray-600">Firmas Pendientes</p>
+            <p className="text-2xl font-bold">{stats.pendingSignatures}</p>
           </Card>
           <Card>
-            <p className="text-sm text-gray-600">Completados</p>
-            <p className="text-2xl font-bold">{stats.completed}</p>
+            <p className="text-sm text-gray-600">Firmados Este Mes</p>
+            <p className="text-2xl font-bold">{stats.signedThisMonth}</p>
           </Card>
         </div>
       )}

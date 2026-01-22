@@ -15,4 +15,7 @@ export type { Contract, Party, Signature } from './contract.types';
 export type { NotificationSettings } from './auth.types';
 
 // Re-export notification types
-export type { SendInvitationRequest, SendInvitationResponse, NotificationTemplate } from './notification.types';
+export * from './notification.types';
+
+// Re-export AddPartyRequest
+export type { AddPartyRequest } from './contract.types';

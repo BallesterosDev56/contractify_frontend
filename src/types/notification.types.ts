@@ -2,12 +2,11 @@
  * Tipos relacionados con notificaciones
  */
 
+// SendInvitationRequest alineado con OpenAPI
 export interface SendInvitationRequest {
   contractId: string;
   partyId: string;
-  email: string;
-  message?: string;
-  templateId?: string;
+  message?: string; // nullable
 }
 
 export interface SendInvitationResponse {
@@ -15,10 +14,11 @@ export interface SendInvitationResponse {
   sentAt: string; // ISO date-time string
 }
 
+// NotificationTemplate alineado con OpenAPI
 export interface NotificationTemplate {
   id: string;
   name: string;
-  description: string;
+  description?: string; // nullable
 }
 
 export interface NotificationSettings {

@@ -10,11 +10,12 @@ export interface SignRequest {
   evidence?: SignatureEvidence; // Opcional según OpenAPI
 }
 
+// SignResponse alineado con OpenAPI SignatureResponse
 export interface SignResponse {
   signatureId: string;
-  documentHash: string;
-  signedAt: string;
-  certificateUrl: string;
+  documentHash?: string; // nullable
+  signedAt: string; // ISO date-time
+  certificateUrl?: string; // nullable
 }
 
 export interface SignGuestRequest {
@@ -22,10 +23,13 @@ export interface SignGuestRequest {
   evidence?: SignatureEvidence; // Opcional según OpenAPI
 }
 
+// SignGuestResponse es el mismo que SignatureResponse según OpenAPI
+// Ambos endpoints retornan SignatureResponse
 export interface SignGuestResponse {
-  signature: Signature;
-  certificate: SignatureCertificate;
-  contract: Contract;
+  signatureId: string;
+  documentHash?: string; // nullable
+  signedAt: string; // ISO date-time
+  certificateUrl?: string; // nullable
 }
 
 export interface SignatureToken {
